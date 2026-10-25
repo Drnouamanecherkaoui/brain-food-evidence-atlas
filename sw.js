@@ -1,6 +1,6 @@
-// service worker: offline copy of the atlas. Version 7cbff3eae9 (built 20261025191129 UTC).
-const CACHE = 'atlas-7cbff3eae9';
-const ASSETS = ["./", "index.html", "styles.css?v=7cbff3eae9", "app.js?v=7cbff3eae9", "data/bibliography.js?v=7cbff3eae9", "data/meta.js?v=7cbff3eae9", "data/monographs.js?v=7cbff3eae9", "data/syntheses.js?v=7cbff3eae9", "manifest.webmanifest", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png"];
+// service worker: offline copy of the atlas. Version 88b0b8a380 (built 20261025191506 UTC).
+const CACHE = 'atlas-88b0b8a380';
+const ASSETS = ["./", "index.html", "styles.css?v=88b0b8a380", "app.js?v=88b0b8a380", "data/bibliography.js?v=88b0b8a380", "data/meta.js?v=88b0b8a380", "data/monographs.js?v=88b0b8a380", "data/syntheses.js?v=88b0b8a380", "manifest.webmanifest", "icons/icon.svg", "icons/icon-192.png", "icons/icon-512.png"];
 self.addEventListener('install', e => { e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())); });
 self.addEventListener('activate', e => { e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith('atlas-') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())); });
 self.addEventListener('fetch', e => {
