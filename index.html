@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Brain Food Evidence Atlas</title>
+<meta name="description" content="NEUROFUEL LAB research database: verified human evidence on nutrition and cognitive performance, with safety, regulatory and product analysis for the Brain Food brand.">
+<!-- unlisted while the research is in draft: remove this line (and robots.txt) to allow search indexing -->
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#124e66" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1419" media="(prefers-color-scheme: dark)">
+<meta name="color-scheme" content="light dark">
+<meta property="og:title" content="Brain Food Evidence Atlas">
+<meta property="og:description" content="Graded, citation-verified human evidence on nutrition and cognition, with safety, regulatory and product analysis.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="icons/icon-512.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="styles.css?v=7cbff3eae9">
+</head>
+<body>
+<div class="topbar">
+  <a class="name" href="#home" style="font-family:var(--font-display);font-weight:700;text-decoration:none;color:var(--fg)">Brain Food Evidence Atlas</a>
+  <button id="menuBtn" type="button" aria-controls="rail" aria-expanded="false">Menu</button>
+</div>
+<div class="scrim" id="scrim" hidden></div>
+<div class="shell">
+  <aside class="rail" id="rail" aria-label="Sections">
+    <div class="brand">
+      <a class="name" href="#home">Brain Food Evidence Atlas</a>
+      <span class="tag">NEUROFUEL LAB · nutrition × cognition · verified human evidence</span>
+    </div>
+    <nav class="nav" id="nav"></nav>
+  </aside>
+  <main id="app" class="wrap" aria-live="polite"></main>
+</div>
+<script src="data/meta.js?v=7cbff3eae9"></script>
+<script src="data/monographs.js?v=7cbff3eae9"></script>
+<script src="data/syntheses.js?v=7cbff3eae9"></script>
+<script src="data/bibliography.js?v=7cbff3eae9"></script>
+<script src="app.js?v=7cbff3eae9"></script>
+</body>
+</html>
