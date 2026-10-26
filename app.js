@@ -92,7 +92,7 @@
   }
   function sourcesList(src) {
     if (!Array.isArray(src) || !src.length) return '';
-    return `<div class="section"><h2>Sources</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>id</th><th>Source</th><th>Type</th><th>Links</th><th>Verified</th><th>Note</th></tr></thead><tbody>${src.map(s => `<tr><td class="mono">${esc(s.id)}</td><td class="wrap"><strong>${esc(s.title)}</strong>${s.year ? ' (' + esc(s.year) + ')' : ''}${s.authors ? '<br><small>' + esc(s.authors) + '</small>' : ''}</td><td>${esc(s.type || '')}</td><td class="tight">${[pmLink(s), doiLink(s), s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">link</a>` : ''].filter(Boolean).join(' · ')}</td><td>${s.verified === false ? '<span class="badge fail">not verified</span>' : s.verified ? '<span class="badge pass">verified</span>' : '<span class="badge unknown">?</span>'}</td><td class="wrap small">${inline(s.note || '')}${s.accessed ? ' <span class="muted">(accessed ' + esc(s.accessed) + ')</span>' : ''}</td></tr>`).join('')}</tbody></table></div></div>`;
+    return `<div class="section"><h2>Sources</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>id</th><th>Source</th><th>Type</th><th>Links</th><th>Verified</th><th>Note</th></tr></thead><tbody>${src.map(s => `<tr><td class="mono">${esc(s.id)}</td><td class="wrap"><strong>${esc(s.title)}</strong>${s.year ? ' (' + esc(s.year) + ')' : ''}${s.authors ? '<br><small>' + esc(s.authors) + '</small>' : ''}</td><td>${esc(s.type || '')}</td><td class="tight">${[pmLink(s), doiLink(s), s.url ? `<a href="${esc(s.url)}" target="_blank" rel="noopener">link</a>` : ''].filter(Boolean).join(' · ')}</td><td>${s.id_check ? verifBadge({ verification: { status: s.id_check.status } }) : s.verified === false ? '<span class="badge fail">not verified</span>' : s.verified ? '<span class="badge conditional" title="Checked by the research agent (web page or search record); no PubMed/Crossref identifier to batch-check">agent checked</span>' : '<span class="badge unknown">?</span>'}</td><td class="wrap small">${inline(s.note || '')}${s.accessed ? ' <span class="muted">(accessed ' + esc(s.accessed) + ')</span>' : ''}</td></tr>`).join('')}</tbody></table></div></div>`;
   }
   function synthesisStatus(sy) {
     if (!sy) return '';
@@ -136,7 +136,9 @@
     let html = `<div class="filters" data-tbl="${spec.id}">`;
     if (spec.search) html += `<label>Search<input type="search" id="${spec.id}-q" value="${esc(st.q)}" placeholder="type to filter…"></label>`;
     (spec.filters || []).forEach(f => { html += `<label>${esc(f.label)}<select id="${spec.id}-f-${f.key}" data-f="${f.key}"><option value="">All</option>${f.options.map(o => `<option value="${esc(o[0])}" ${String(st.f[f.key]) === String(o[0]) ? 'selected' : ''}>${esc(o[1])}</option>`).join('')}</select></label>`; });
-    html += `<span class="spacer"></span><span class="small">${rows.length} rows${rows.length > shown.length ? ' (showing ' + shown.length + ')' : ''}</span></div>`;
+    (window.__tblSpec = window.__tblSpec || {})[spec.id] = spec;
+    st._rows = rows;
+    html += `<span class="spacer"></span><span class="small">${rows.length} rows${rows.length > shown.length ? ' (showing ' + shown.length + ')' : ''}</span><button type="button" class="btn" data-export="${spec.id}" title="Download the filtered rows as a spreadsheet file">Download CSV</button></div>`;
     html += `<div class="tbl-wrap"><table class="tbl" id="${spec.id}"><thead><tr>${spec.columns.map(c => `<th class="${c.sort !== false ? 'sortable' : ''}" data-sort="${c.key}">${esc(c.label)}${st.sort === c.key ? `<span class="arrow">${st.dir === 'asc' ? '▲' : '▼'}</span>` : ''}</th>`).join('')}</tr></thead><tbody>`;
     html += shown.map(r => '<tr>' + spec.columns.map(c => `<td class="${c.cls || ''}">${c.render ? c.render(r) : esc(r[c.key])}</td>`).join('') + '</tr>').join('');
     html += `</tbody></table></div>`;
@@ -152,6 +154,21 @@
     });
     root.querySelectorAll('table.tbl th.sortable').forEach(th => th.addEventListener('click', () => { const id = th.closest('table').id, st = window.__tbl[id]; if (!st) return; if (st.sort === th.dataset.sort) st.dir = st.dir === 'asc' ? 'desc' : 'asc'; else { st.sort = th.dataset.sort; st.dir = 'desc'; } render(); }));
     root.querySelectorAll('button[data-more]').forEach(b => b.addEventListener('click', () => { window.__tbl[b.dataset.more].limit = 100000; render(); }));
+    root.querySelectorAll('button[data-export]').forEach(b => b.addEventListener('click', () => exportCsv(b.dataset.export)));
+  }
+  // CSV export of the currently filtered rows: plain text of each rendered cell
+  function exportCsv(id) {
+    const spec = window.__tblSpec[id], st = window.__tbl[id];
+    if (!spec || !st) return;
+    const txt = h => { const d = document.createElement('div'); d.innerHTML = h == null ? '' : String(h); return (d.textContent || '').replace(/\s+/g, ' ').trim(); };
+    const q = v => '"' + String(v).replace(/"/g, '""') + '"';
+    const lines = [spec.columns.map(c => q(c.label)).join(',')].concat((st._rows || []).map(r => spec.columns.map(c => q(txt(c.render ? c.render(r) : r[c.key]))).join(',')));
+    const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `brain-food-${id}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
 
   // ---------- views ----------
@@ -159,7 +176,7 @@
   MONOS.forEach(m => (m.evidence_by_outcome || []).forEach((r, i) => ROWS.push(Object.assign({ _m: m, _i: i }, r))));
   const CAT_OPTS = Object.keys(META.categories || {}).filter(k => MONOS.some(m => m.category === k)).map(k => [k, k + ' · ' + META.categories[k]]);
   const monoCols = [
-    { key: 'name', label: 'Ingredient', sort: r => r.name.toLowerCase(), render: r => `<a href="#ingredient.${esc(r.id)}"><strong>${esc(r.name)}</strong></a>${r._derived.review_status !== 'reviewed' ? ' <span class="badge conditional" title="not yet independently reviewed">draft</span>' : ''}`, cls: 'wrap' },
+    { key: 'name', label: 'Ingredient', sort: r => r.name.toLowerCase(), render: r => `<a href="#ingredient.${esc(r.id)}"><strong>${esc(r.name)}</strong></a>`, cls: 'wrap' },
     { key: 'category', label: 'Cat.', sort: r => r.category, render: r => `<span class="pill" title="${esc(r.category_name)}">${esc(r.category)}</span>` },
     { key: 'acute', label: 'Acute', sort: r => sortGrade(r._derived.best_grade_acute), render: r => grade(r._derived.best_grade_acute) },
     { key: 'chronic', label: 'Long-term', sort: r => sortGrade(r._derived.best_grade_chronic), render: r => grade(r._derived.best_grade_chronic) },
@@ -199,11 +216,14 @@
     <div class="cards">
       <a class="card link" href="#summary"><h3>Executive scientific summary</h3><p class="small">Main conclusions, key evidence, major uncertainties and safety findings.</p></a>
       <a class="card link" href="#database"><h3>Ingredient database</h3><p class="small">Sortable scores, grades and hard safety/regulatory gates for every ingredient.</p></a>
+      <a class="card link" href="#matrix"><h3>Evidence matrix</h3><p class="small">Every ingredient against every cognitive outcome, filterable by population and timeframe.</p></a>
+      <a class="card link" href="#compare"><h3>Compare ingredients</h3><p class="small">Up to four side by side: gates, scores, grades, safety and authorised claims.</p></a>
       <a class="card link" href="#rankings"><h3>Rankings A–I</h3><p class="small">Best supported per cognitive domain, whole foods, product candidates, weak claims, safety concerns.</p></a>
       <a class="card link" href="#products"><h3>Product concepts</h3><p class="small">Five product families with concept sheets built only from eligible evidence.</p></a>
       <a class="card link" href="#regulatory"><h3>Regulatory & claims</h3><p class="small">Morocco, EU and US rules; the claims-risk table.</p></a>
-      <a class="card link" href="#bibliography"><h3>Bibliography</h3><p class="small">Every cited study with its verification status and links.</p></a>
+      <a class="card link" href="#claims"><h3>Claims library</h3><p class="small">Every authorised claim found, next to refused and on-hold claims.</p></a>
     </div>
+    ${progressPanel()}
     <h2>Distribution of evidence grades across all outcome rows</h2>
     <p class="small">Each row is one ingredient × cognitive outcome × population × timeframe judgement. Grade letters are always shown; colours are secondary.</p>
     <div class="gchart">${['A', 'B', 'C', 'D', 'E'].map(g => `<div>${grade(g)}</div><div class="track"><div class="fill" style="width:${(gd[g] || 0) / total * 100}%;background:var(--g${g})"></div></div><div class="n">${gd[g] || 0}</div>`).join('')}</div>
@@ -213,10 +233,111 @@
     <div class="section prose"><h2>How to read this atlas</h2><ul><li><strong>Grades are per outcome, population and timeframe.</strong> An ingredient can be A for acute alertness and D for memory.</li><li><strong>Acute</strong> means a single dose or day; <strong>chronic</strong> means two weeks or longer. Benefits in deficient people are reported separately from enhancement in well-nourished people.</li><li><strong>Verification.</strong> Each study was checked against PubMed or Crossref. Unverified items stay visible but carry no weight.</li><li><strong>Gates.</strong> A safety or regulatory gate failure makes an ingredient ineligible for product development regardless of its score.</li></ul></div>`;
   }
 
+  function progressPanel() {
+    const p = META.progress;
+    if (!p) return '';
+    const pct = Math.round(p.units_done / p.units_total * 100);
+    const sd = p.synthesis_documents_done.length, se = p.synthesis_documents_expected.length;
+    return `<div class="card" style="margin:1rem 0"><div class="eyebrow">Research program progress</div>
+      <div class="scoregrid" style="margin-top:.5rem">
+        <div><div class="lab">Research units complete: ${p.units_done} of ${p.units_total}</div><span class="bar" style="width:100%"><span class="track"><span class="fill" style="width:${pct}%"></span></span><span class="v">${pct}%</span></span></div>
+        <div><div class="lab">Synthesis documents written: ${sd} of ${se}</div><span class="bar" style="width:100%"><span class="track"><span class="fill" style="width:${Math.round(sd / se * 100)}%"></span></span><span class="v">${Math.round(sd / se * 100)}%</span></span></div>
+      </div>
+      ${p.pending.length ? `<p class="small" style="margin:.5rem 0 0">Still to research: ${esc(p.pending.map(x => x.replace(/^[A-Z]\d+[a-z]?-/, '').replace(/-/g, ' ')).join(', '))}. The executive summary, rankings and product concepts are written after the research finishes.</p>` : ''}</div>`;
+  }
+
   function viewDatabase() {
     return `<div class="page-head"><div><h1>Ingredient database</h1><p class="lead">Every investigated ingredient, food and dietary pattern with its best evidence grades, hard gates and transparent sub-scores. Click a column header to sort; use the filters to narrow.</p><p class="small">Grade columns show the best grade for a <em>benefit</em> on a measured cognitive outcome. Biomarkers (brain creatine, cerebral blood flow, BDNF) and mood rows never count toward them. “Young adults (rested)” covers healthy young adults, students and knowledge workers; sleep-deprived trials have their own column.</p></div></div>
+    ${draftBanner()}
     ${dataTable({ id: 'monos', columns: monoCols, rows: MONOS, filters: monoFilters, search: monoSearch, defaultSort: 'comp', pageSize: 500 })}`;
   }
+  function draftBanner() {
+    const n = MONOS.filter(m => m._derived.review_status !== 'reviewed').length;
+    return n ? `<div class="banner"><span class="badge conditional">draft</span><span>${n} of ${MONOS.length} monographs are drafts: written and self-audited by the research agents, with every citation matched to PubMed or Crossref, but not yet through the independent second review.</span></div>` : '';
+  }
+
+  // ---------- evidence matrix ----------
+  const MATRIX_GROUPS = [
+    ['Acute performance', ['alertness', 'sustained_attention', 'vigilance', 'reaction_time', 'processing_speed', 'working_memory', 'executive_function', 'cognitive_fatigue']],
+    ['Memory & learning', ['learning', 'episodic_memory', 'learning_retention']],
+    ['Long-term', ['global_cognition', 'cognitive_aging', 'cognitive_decline', 'dementia_risk']],
+    ['Under strain', ['sleep_related_cognition', 'resistance_to_decline']],
+    ['Not cognition', ['mood_stress', 'cerebral_blood_flow', 'vascular_health', 'neuroplasticity_biomarkers']],
+  ];
+  const MATRIX_POPS = [['all', 'All populations'], ['young', 'Young adults, students, workers (rested)'], ['sleep', 'Sleep-deprived'], ['older', 'Older adults (healthy)'], ['mci', 'Older adults with MCI'], ['deficient', 'Deficient / low baseline']];
+  const POP_SETS = { young: new Set(['healthy_young_adults', 'students', 'knowledge_workers', 'high_cognitive_workload']), sleep: new Set(['sleep_deprived']), older: new Set(['older_adults_healthy']), mci: new Set(['older_adults_mci']), deficient: new Set(['deficient_or_low_baseline']) };
+  const mst = { pop: 'all', tf: 'all', sort: 'best' };
+  function cellFor(m, dom) {
+    const rows = (m.evidence_by_outcome || []).filter(r => r.domain === dom && (mst.pop === 'all' || POP_SETS[mst.pop].has(r.population)) && (mst.tf === 'all' || (mst.tf === 'acute' ? r.timeframe === 'acute' : r.timeframe !== 'acute')));
+    if (!rows.length) return null;
+    const ben = rows.filter(r => ['benefit', 'possible_benefit'].includes(r.direction) && GR[r.grade]);
+    const harm = rows.filter(r => r.direction === 'harm');
+    const best = ben.sort((a, b) => GR[b.grade] - GR[a.grade])[0];
+    const tip = rows.map(r => `${r.grade} ${lab(DIR_LABEL, r.direction)} · ${lab(POP_LABEL, r.population)} · ${lab(TF_LABEL, r.timeframe)} · ${r.dose_or_intake || ''}`).join('\n');
+    if (best && best.grade !== 'E') return { cls: 'b-' + best.grade, txt: best.grade, tip };
+    if (harm.length) return { cls: 'h', txt: '!', tip };
+    const nb = rows.find(r => r.direction === 'no_benefit');
+    return { cls: 'n', txt: nb ? '×' : '~', tip };
+  }
+  function viewMatrix() {
+    const doms = MATRIX_GROUPS.flatMap(g => g[1]);
+    let monos = MONOS.slice();
+    const score = m => { let s = 0; doms.forEach(d => { const c = cellFor(m, d); if (c && c.cls.startsWith('b-') && !MATRIX_GROUPS[4][1].includes(d)) s = Math.max(s, GR[c.txt]); }); return s; };
+    if (mst.sort === 'best') monos.sort((a, b) => score(b) - score(a) || b._derived.composite_score - a._derived.composite_score);
+    else if (mst.sort === 'cat') monos.sort((a, b) => a.category.localeCompare(b.category) || a.name.localeCompare(b.name));
+    else monos.sort((a, b) => a.name.localeCompare(b.name));
+    const shown = monos.filter(m => doms.some(d => cellFor(m, d)));
+    const head1 = '<tr><th></th>' + MATRIX_GROUPS.map((g, i) => `${i ? '<th class="gap"></th>' : ''}<th class="grp" colspan="${g[1].length}">${esc(g[0])}</th>`).join('') + '</tr>';
+    const SHORT = { resistance_to_decline: 'Sustained performance', neuroplasticity_biomarkers: 'Brain biomarkers', sleep_related_cognition: 'Under sleep loss', vascular_health: 'Vascular health' };
+    const head2 = '<tr><th>Ingredient</th>' + MATRIX_GROUPS.map((g, i) => (i ? '<th class="gap"></th>' : '') + g[1].map(d => `<th class="dom" title="${esc(lab(DOMAIN_LABEL, d))}">${esc(SHORT[d] || lab(DOMAIN_LABEL, d))}</th>`).join('')).join('') + '</tr>';
+    const body = shown.map(m => `<tr><td class="name"><a href="#ingredient.${esc(m.id)}" title="${esc(m.one_line_verdict)}">${esc(m.name)}</a></td>` + MATRIX_GROUPS.map((g, i) => (i ? '<td class="gap"></td>' : '') + g[1].map(d => { const c = cellFor(m, d); return c ? `<td class="cell ${c.cls}" title="${esc(lab(DOMAIN_LABEL, d) + '\n' + c.tip)}"><a href="#ingredient.${esc(m.id)}">${esc(c.txt)}</a></td>` : '<td class="cell"></td>'; }).join('')).join('') + '</tr>').join('');
+    const sel = (id, opts, cur) => `<select id="${id}">${opts.map(([v, l]) => `<option value="${v}" ${v === cur ? 'selected' : ''}>${esc(l)}</option>`).join('')}</select>`;
+    return `<div class="page-head"><div><h1>Evidence matrix</h1><p class="lead">Every ingredient against every outcome the literature measured. A filled square is the best grade for a <em>benefit</em>; an outlined square means it was studied and showed no benefit (×) or inconsistent results (~); a red square marks a negative effect. Hover a square for the underlying rows; click to open the monograph.</p></div></div>
+    <div class="filters"><label>Population${sel('mx-pop', MATRIX_POPS, mst.pop)}</label><label>Timeframe${sel('mx-tf', [['all', 'Acute and long-term'], ['acute', 'Acute only (single dose / day)'], ['chronic', 'Repeated use (days or longer)']], mst.tf)}</label><label>Order${sel('mx-sort', [['best', 'Best cognitive grade first'], ['cat', 'By category'], ['name', 'A to Z']], mst.sort)}</label><span class="spacer"></span><span class="small">${shown.length} of ${MONOS.length} ingredients have rows for this selection</span></div>
+    <div class="legend"><span><span class="sw" style="background:var(--gA);color:#fff">A</span>strong</span><span><span class="sw" style="background:var(--gB);color:#fff">B</span>moderate</span><span><span class="sw" style="background:var(--gC);color:#fff">C</span>limited</span><span><span class="sw" style="background:var(--gD);color:#fff">D</span>preliminary</span><span><span class="sw" style="box-shadow:inset 0 0 0 1.5px var(--border-strong)">×</span>no benefit</span><span><span class="sw" style="box-shadow:inset 0 0 0 1.5px var(--border-strong)">~</span>inconsistent</span><span><span class="sw" style="background:var(--gE-soft);box-shadow:inset 0 0 0 1.5px var(--gE);color:var(--gE)">!</span>negative effect</span></div>
+    <div class="tbl-wrap" style="padding:.5rem"><table class="matrix"><thead>${head1}${head2}</thead><tbody>${body}</tbody></table></div>
+    <p class="small">The last group (mood, blood flow, vascular, biomarkers) is shown for completeness but is not cognition: a change there does not mean better thinking.</p>`;
+  }
+
+  // ---------- compare ----------
+  let CMP = [];
+  function viewCompare(param) {
+    if (param) CMP = param.split(',').filter(id => byId[id]).slice(0, 4);
+    if (!CMP.length) CMP = ['caffeine', 'l-theanine', 'creatine'].filter(id => byId[id]);
+    const opts = MONOS.slice().sort((a, b) => a.name.localeCompare(b.name));
+    const picker = [0, 1, 2, 3].map(i => `<select id="cmp-${i}" data-slot="${i}" aria-label="Ingredient ${i + 1}"><option value="">${i < CMP.length ? 'Remove' : 'Add an ingredient…'}</option>${opts.map(m => `<option value="${esc(m.id)}" ${CMP[i] === m.id ? 'selected' : ''}>${esc(m.name)}</option>`).join('')}</select>`).join('');
+    const ms = CMP.map(id => byId[id]);
+    const row = (label, f) => `<tr><th class="rowh">${esc(label)}</th>${ms.map(m => `<td class="wrap">${f(m)}</td>`).join('')}</tr>`;
+    const benefitList = m => { const b = m._derived.benefit_domains || {}; const k = Object.keys(b).sort((x, y) => GR[b[y]] - GR[b[x]]); return k.length ? k.map(d => `${grade(b[d])} ${esc(lab(DOMAIN_LABEL, d))}`).join('<br>') : '<span class="muted">none</span>'; };
+    const nulls = m => { const r = (m.evidence_by_outcome || []).filter(x => x.direction === 'no_benefit' && ['A', 'B'].includes(x.grade)); return r.length ? r.map(x => `${grade(x.grade)} ${esc(lab(DOMAIN_LABEL, x.domain))} · ${esc(lab(POP_LABEL, x.population))}`).join('<br>') : '<span class="muted">none</span>'; };
+    const table = ms.length ? `<div class="tbl-wrap"><table class="tbl cmp"><thead><tr><th class="rowh"></th>${ms.map(m => `<th><a href="#ingredient.${esc(m.id)}">${esc(m.name)}</a></th>`).join('')}</tr></thead><tbody>
+      ${row('Verdict', m => esc(m.one_line_verdict))}
+      ${row('Eligibility', m => `${gate(m._derived.safety_gate)} safety<br>${gate(m._derived.regulatory_gate)} regulatory`)}
+      ${row('Composite score', m => `<strong class="mono">${m._derived.composite_score.toFixed(1)}</strong> / 10`)}
+      ${row('Evidence quality', m => bar(m.scores.evidence_quality))}
+      ${row('Effect size', m => bar(m.scores.effect_magnitude))}
+      ${row('Safety', m => bar(m.scores.safety))}
+      ${row('Food suitability', m => bar(m.scores.food_suitability))}
+      ${row('Cost / access', m => bar(m.scores.cost_access))}
+      ${row('Best grade: acute', m => grade(m._derived.best_grade_acute))}
+      ${row('Best grade: long-term', m => grade(m._derived.best_grade_chronic))}
+      ${row('Best grade: young adults', m => grade(m._derived.best_grade_young_adults))}
+      ${row('Best grade: sleep loss', m => grade(m._derived.best_grade_sleep_stress))}
+      ${row('Benefit by domain', benefitList)}
+      ${row('Strong null findings (A/B)', nulls)}
+      ${row('Daily use', m => esc((m.safety || {}).daily_use_appropriate || '—'))}
+      ${row('Sleep impact', m => inline((m.safety || {}).sleep_impact || '—'))}
+      ${row('Upper limits', m => inline((m.safety || {}).upper_limits || '—'))}
+      ${row('Interactions', m => esc(((m.safety || {}).drug_interactions || []).join('; ') || '—'))}
+      ${row('Dose feasibility in food', m => inline((m.formulation || {}).dose_feasibility || '—'))}
+      ${row('Authorised claims', m => fmtList((m.regulatory || {}).permitted_claims_examples))}
+      ${row('Studies (verified)', m => `<span class="mono">${m._derived.n_verified} / ${m._derived.n_studies}</span>`)}
+    </tbody></table></div>` : '<p class="muted">Pick at least one ingredient.</p>';
+    return `<div class="page-head"><div><h1>Compare ingredients</h1><p class="lead">Up to four ingredients side by side: hard gates, transparent scores, best grades by population, strong null findings, safety and the claims that are actually authorised.</p></div></div>
+    <div class="cmp-pick">${picker}</div>${table}`;
+  }
+
+  // ---------- navigation ----------
 
   function evidenceTable(id, rows, extraFilters) {
     const domains = [...new Set(rows.map(r => r.domain))].map(d => [d, lab(DOMAIN_LABEL, d)]).sort((a, b) => a[1].localeCompare(b[1]));
@@ -499,10 +620,62 @@
   }
   function viewDecisions() { return synthesisPage('decision-framework', 'Final decision framework', sy => (sy.questions || []).length ? `<div class="section">${sy.questions.map(q => `<div class="card prose" style="margin:.7rem 0"><div class="eyebrow">Question ${esc(q.n)}</div><h3>${esc(q.question)}</h3>${md(q.answer)}${(q.key_ingredients || []).length ? `<p class="small">Ingredients: ${q.key_ingredients.map(monoLink).join(', ')}</p>` : ''}</div>`).join('')}</div>` : ''); }
   function viewSummary() { return synthesisPage('executive-summary', 'Executive scientific summary', sy => ['key_conclusions', 'major_uncertainties', 'safety_findings', 'top_opportunities'].map(k => sy[k] ? `<div class="section prose"><h2>${esc(k.replace(/_/g, ' '))}</h2>${structured(sy[k])}</div>` : '').join('')); }
+  // full-text search across monographs, studies, cross-cutting documents and the bibliography
+  let SEARCH_INDEX = null;
+  function buildIndex() {
+    const docs = [];
+    MONOS.forEach(m => {
+      docs.push({ kind: 'Ingredient', title: m.name, href: '#ingredient.' + m.id, weight: 3, head: (m.name + ' ' + (m.aliases || []).join(' ')).toLowerCase(),
+        text: [m.one_line_verdict, m.scientific_conclusion, m.deficiency_vs_enhancement, m.marketing_vs_evidence, (m.food_sources || []).join(' '), (m.safety || {}).summary, (m.regulatory || {}).eu, (m.regulatory || {}).morocco].join(' \n ') });
+      (m.studies || []).forEach(s => docs.push({ kind: 'Study', title: s.title, href: '#ingredient.' + m.id, sub: `${s.authors ? s.authors.split(',')[0] : ''} ${s.year || ''} · cited in ${m.name}`, weight: 1, head: (s.title || '').toLowerCase(), text: [s.results, s.population, s.intervention].join(' ') }));
+    });
+    const SYN_ROUTE = { 'X1-combinations': 'combinations', 'X2-sleep-deprivation-stress': 'populations', 'X3-cognitive-test-instruments': 'instruments', 'X4-regulatory-eu': 'regulatory', 'X5-regulatory-us': 'regulatory', 'X6-regulatory-morocco': 'regulatory', 'X7a-competitors-supplements': 'competitors', 'X7b-competitors-functional-foods': 'competitors', 'X8-foundations': 'foundations', 'X9-ingredient-costs': 'costs' };
+    Object.entries(SYN).forEach(([id, sy]) => {
+      const href = '#' + (SYN_ROUTE[id] || id);
+      (sy.sections || []).forEach(sec => docs.push({ kind: 'Document', title: `${sy.title || id}: ${sec.heading || ''}`, href, weight: 2, head: (sec.heading || '').toLowerCase(), text: sec.body || '' }));
+      if (sy.summary) docs.push({ kind: 'Document', title: sy.title || id, href, weight: 2, head: (sy.title || '').toLowerCase(), text: sy.summary });
+    });
+    docs.forEach(d => { d.low = (d.text || '').toLowerCase(); });
+    return docs;
+  }
   function viewSearch(q) {
-    const t = (q || '').toLowerCase();
-    const hits = MONOS.filter(m => (m.name + ' ' + (m.aliases || []).join(' ') + ' ' + (m.food_sources || []).join(' ')).toLowerCase().includes(t));
-    return `<h1>Search: “${esc(q)}”</h1>${hits.length ? hits.map(m => `<div class="search-hit"><a href="#ingredient.${esc(m.id)}"><strong>${esc(m.name)}</strong></a> ${grade(m._derived.best_grade_overall)}<br><small>${esc(m.one_line_verdict)}</small></div>`).join('') : '<p class="muted">No ingredient matches. Try the <a href="#bibliography">bibliography</a> search for studies.</p>'}`;
+    if (!SEARCH_INDEX) SEARCH_INDEX = buildIndex();
+    const terms = (q || '').toLowerCase().split(/\s+/).filter(w => w.length > 1);
+    if (!terms.length) return '<h1>Search</h1><p class="muted">Type at least two letters in the search box.</p>';
+    const hits = [];
+    SEARCH_INDEX.forEach(d => {
+      let score = 0;
+      for (const t of terms) {
+        const inHead = d.head.includes(t), inText = d.low.includes(t);
+        if (!inHead && !inText) { score = 0; break; }
+        score += (inHead ? 5 : 0) + (inText ? 1 : 0);
+      }
+      if (score) hits.push({ d, score: score * d.weight });
+    });
+    hits.sort((a, b) => b.score - a.score);
+    const snippet = d => { const i = d.low.indexOf(terms[0]); if (i < 0) return ''; const s = Math.max(0, i - 90); let t = d.text.slice(s, i + 160).replace(/\s+/g, ' '); terms.forEach(w => { t = esc(t).replace(new RegExp('(' + w.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'ig'), '<mark>$1</mark>'); }); return (s ? '… ' : '') + t + ' …'; };
+    const groups = ['Ingredient', 'Document', 'Study'];
+    return `<div class="page-head"><div><h1>Search: “${esc(q)}”</h1><p class="lead">${hits.length} result${hits.length === 1 ? '' : 's'} across ingredient monographs, cross-cutting documents and cited studies.</p></div></div>` +
+      (hits.length ? groups.map(g => { const gh = hits.filter(h => h.d.kind === g).slice(0, g === 'Study' ? 40 : 25); return gh.length ? `<div class="section"><h2>${g === 'Study' ? 'Studies' : g === 'Document' ? 'Documents' : 'Ingredients'} (${hits.filter(h => h.d.kind === g).length})</h2>${gh.map(h => `<div class="search-hit"><a href="${esc(h.d.href)}"><strong>${esc(h.d.title)}</strong></a>${h.d.sub ? ` <span class="small">${esc(h.d.sub)}</span>` : ''}<br><span class="small">${snippet(h.d)}</span></div>`).join('')}</div>` : ''; }).join('') : '<p class="muted">Nothing matches every word. Try fewer or different words.</p>');
+  }
+
+  // ---------- claims library ----------
+  function viewClaims() {
+    const rows = [];
+    MONOS.forEach(m => ((m.regulatory || {}).permitted_claims_examples || []).forEach(c => rows.push({ m, claim: typeof c === 'string' ? c : JSON.stringify(c) })));
+    const eu = (SYN['X4-regulatory-eu'] || {}).authorised_claims_relevant_to_cognition;
+    const rej = (SYN['X4-regulatory-eu'] || {}).rejected_or_on_hold_claims;
+    const cs = SYN['claims-strategy'];
+    return `<div class="page-head"><div><h1>Claims library</h1><p class="lead">Every claim the research found to be actually authorised, next to the claims that were refused or are on hold. Evidence of an effect is not permission to claim it: use only authorised wording, with its conditions of use, and have a regulatory specialist confirm it for each market.</p></div></div>
+    ${eu ? `<div class="section"><h2>EU claims relevant to cognition and the nervous system</h2>${structured(eu)}</div>` : ''}
+    <div class="section"><h2>Authorised claims recorded in the ingredient monographs (${rows.length})</h2>${dataTable({ id: 'claims', rows, defaultSort: 'ing', defaultDir: 'asc', pageSize: 400, columns: [
+      { key: 'ing', label: 'Ingredient', sort: r => r.m.name.toLowerCase(), render: r => `<a href="#ingredient.${esc(r.m.id)}">${esc(r.m.name)}</a>`, cls: 'tight' },
+      { key: 'claim', label: 'Claim and conditions (as recorded)', sort: false, render: r => inline(r.claim), cls: 'wrap' },
+      { key: 'reg', label: 'Regulatory gate', sort: r => r.m._derived.regulatory_gate, render: r => gate(r.m._derived.regulatory_gate) },
+      { key: 'saf', label: 'Safety gate', sort: r => r.m._derived.safety_gate, render: r => gate(r.m._derived.safety_gate) },
+    ], filters: [{ key: 'cat', label: 'Category', options: CAT_OPTS, match: (r, v) => r.m.category === v }], search: (r, q) => (r.m.name + ' ' + r.claim).toLowerCase().includes(q) })}</div>
+    ${rej ? `<div class="section"><h2>Refused or on-hold claims (EU)</h2>${structured(rej)}</div>` : ''}
+    ${cs && cs.claims_risk_table ? `<div class="section"><h2>Claims-risk table</h2>${structured(cs.claims_risk_table)}</div>` : '<p class="small">The full claims-risk table for proposed Brain Food claims is on the <a href="#regulatory">Regulatory &amp; claims</a> page.</p>'}`;
   }
 
   // ---------- theme (system / light / dark; per-viewer preference only) ----------
@@ -515,8 +688,8 @@
   // ---------- navigation ----------
   const NAV = [
     ['Overview', [['home', 'Home'], ['summary', 'Executive summary'], ['decisions', 'Decision framework'], ['methodology', 'Methodology']]],
-    ['Evidence', [['database', 'Ingredient database', () => MONOS.length], ['acute', 'Acute performance'], ['longterm', 'Long-term function'], ['populations', 'Populations'], ['combinations', 'Combinations'], ['rankings', 'Rankings'], ['myths', 'Myths vs evidence'], ['foundations', 'Foundations']]],
-    ['Safety & rules', [['safety', 'Safety review'], ['regulatory', 'Regulatory & claims']]],
+    ['Evidence', [['database', 'Ingredient database', () => MONOS.length], ['matrix', 'Evidence matrix'], ['compare', 'Compare'], ['acute', 'Acute performance'], ['longterm', 'Long-term function'], ['populations', 'Populations'], ['combinations', 'Combinations'], ['rankings', 'Rankings'], ['myths', 'Myths vs evidence'], ['foundations', 'Foundations']]],
+    ['Safety & rules', [['safety', 'Safety review'], ['regulatory', 'Regulatory & claims'], ['claims', 'Claims library']]],
     ['Company', [['competitors', 'Competitors'], ['products', 'Product concepts'], ['costs', 'Ingredient costs'], ['validation', 'Clinical roadmap'], ['instruments', 'Test instruments'], ['brand', 'Brand positioning']]],
     ['Reference', [['bibliography', 'Bibliography', () => BIB.length]]],
   ];
@@ -542,12 +715,17 @@
     let html;
     try {
       if (view === 'ingredient') html = viewIngredient(param);
+      else if (view === 'compare') html = viewCompare(param);
+      else if (view === 'matrix') html = viewMatrix();
+      else if (view === 'claims') html = viewClaims();
       else if (view === 'search') html = viewSearch(param);
       else if (VIEWS[view]) html = VIEWS[view]();
       else html = `<h1>Section not found</h1><p><a href="#home">Back home</a>.</p>`;
     } catch (e) { html = `<h1>Rendering error</h1><pre>${esc(e.stack || e)}</pre>`; console.error(e); }
     app.innerHTML = html + `<div class="footer-note">Brain Food Evidence Atlas · data built ${esc((META.generated_at || '').replace('T', ' ').slice(0, 16))} UTC · ${META.counts ? esc(META.counts.monographs) : 0} monographs · scores are decision-support heuristics, not validated measures · nothing here is medical advice or a product claim.</div>`;
     wireTables(app);
+    [['mx-pop', 'pop'], ['mx-tf', 'tf'], ['mx-sort', 'sort']].forEach(([id, k]) => { const s = document.getElementById(id); if (s && s.addEventListener) s.addEventListener('change', () => { mst[k] = s.value; render(); }); });
+    [0, 1, 2, 3].forEach(i => { const s = document.getElementById('cmp-' + i); if (s && s.addEventListener) s.addEventListener('change', () => { const next = CMP.slice(); if (s.value) next[i] = s.value; else next.splice(i, 1); go('compare.' + next.filter(Boolean).filter((v, j, a) => a.indexOf(v) === j).join(',')); }); });
     app.querySelectorAll('a.ref[data-ref]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); const el = document.getElementById('study-' + a.dataset.ref); if (el) { el.open = true; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }));
     app.querySelectorAll('.toc a[data-jump]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); const el = document.getElementById(a.dataset.jump); if (el) el.scrollIntoView({ behavior: 'smooth' }); }));
     app.querySelectorAll('.tabs').forEach(tabs => tabs.querySelectorAll('button[data-tab]').forEach(b => b.addEventListener('click', () => { tabs.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b)); const pane = tabs.parentElement; pane.querySelectorAll('.tabpane').forEach(p => { p.hidden = p.id !== b.dataset.tab; }); })));
