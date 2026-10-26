@@ -382,6 +382,48 @@
       { key: 'st', label: 'Studies', sort: false, render: r => (r.study_ids || []).map(s => `<a href="#ingredient.${esc(r._m.id)}" title="see study ${esc(s)} in the monograph">${esc(s)}</a>`).join(', ') },
     ], filters: [{ key: 'cat', label: 'Category', options: CAT_OPTS, match: (r, v) => r._m.category === v }], search: (r, q) => (r._m.name + ' ' + r.domain + ' ' + r.population).toLowerCase().includes(q) })}</div>`;
   }
+  function viewPill() {
+    const stack = [
+      { id: 'caffeine', dose: '100–200 mg (roughly one strong cup of coffee), once', timing: 'Take 30–60 min before the task; effect peaks within about an hour and runs 3–4 h.',
+        what: 'The single best-proven acute cognitive lever in the whole database. Reaction time improves within minutes (31-trial meta-analysis, g = 0.28, dose-dependent up to ~200 mg+), and sustained attention/vigilance accuracy improves (pooled g = 0.27). Benefits hold even in light or non-habitual users, not just caffeine-withdrawn ones.',
+        rescue: 'Under sleep deprivation the effect is much larger, not smaller: 100–600 mg produced g = 0.86 (attention response time), g = 1.11 (reaction time) and restored psychomotor vigilance after 64 h awake comparably to modafinil 400 mg or d-amphetamine 20 mg.',
+        catch_: 'Executive function gains are smaller and inconsistent (g = 0.35, mixed across specific tasks). Raises anxiety/jitteriness in low/non-consumers and reliably harms sleep if taken within about 9–13 h of bedtime — the "cost" of a stimulant stack is paid at night.' },
+      { id: 'l-theanine', dose: '100–200 mg, alongside the caffeine dose above', timing: 'Same time as caffeine; effect window similar (within ~2 h).',
+        what: 'Speeds choice/recognition reaction time by ~15–20 ms alone. Its main value is pairing with caffeine: the combination improves alertness and attention-switching accuracy with less of the jitteriness caffeine causes alone — though the trial literature says caffeine dose explains most of the combined effect, and two trials found no extra benefit over caffeine alone.',
+        rescue: null,
+        catch_: 'Simple reaction time does not improve in pooled analyses. This is a smoothing agent for caffeine, not an independent enhancer at the available doses.' },
+      { id: 'creatine', dose: '0.2–0.35 g/kg (about 14–25 g for a 70 kg adult), single dose, 1.5–3 h before testing', timing: 'Take 1.5–3 h ahead — onset is slower than caffeine.',
+        what: 'The rescue ingredient for sleep-deprived cognition specifically: a single large dose improved processing speed on language, logic and numeric tasks plus PVT reaction speed during sleep deprivation, tracking measurable brain-energy changes (PCr/Pi, ATP, prevented cerebral pH drop).',
+        rescue: 'This is its one acute use case — do not expect it to sharpen a rested, well-slept brain.',
+        catch_: 'In rested healthy adults, acute single-dose creatine for working memory is graded D (insufficient evidence) — it does essentially nothing for a brain that is not short on sleep or energy. The acute dose (14–25 g) is well above Brain Food\'s proposed 5 g/day daily cap, so this is an occasional-use rescue dose, not a daily stack component.' },
+      { id: 'american-ginseng-cereboost', dose: '100–200 mg standardized extract (10.65% ginsenosides), single dose', timing: 'Take 1–3 h before the task — effect was measured at post-dose testing through about 3 h.',
+        what: 'The one botanical with real acute single-dose human trial evidence for working memory: all tested doses (100/200/400 mg) improved spatial working memory (Corsi block test); 200 mg improved a composite working-memory factor in knowledge workers specifically, with no change in mood or blood glucose.',
+        rescue: null,
+        catch_: 'Only two small industry-sponsored trials behind this; no long-term safety data exists, so the safety gate is conditional, not a clean pass.' },
+    ];
+    const notStack = [
+      { id: 'tea-and-green-tea', why: 'Real acute alertness/attention benefit, but it is the caffeine in it doing the work (37.5–75 mg per cup) — a weaker, slower version of the coffee effect, not an addition to it.' },
+      { id: 'cocoa-flavanols', why: 'Improves cerebral blood flow acutely (grade B) but blood flow is a mechanistic/surrogate marker, not a measured cognitive-performance outcome — it did not make the stack because the benefit domain itself does not count as enhancement.' },
+      { id: 'resveratrol', why: 'Same issue as cocoa flavanols: acute cerebral-blood-flow grade B, but no acute cognitive-outcome data behind it.' },
+      { id: 'multi-ingredient-nootropic-blends', why: 'Grade B for sustained attention exists only at the level of proprietary multi-ingredient blends as tested — it cannot be decomposed into which single ingredient did the work, so it is not addable here.' },
+      { id: 'energy-drinks-and-stimulant-beverages', why: 'The attention/vigilance benefit is again the caffeine (plus sugar) in the can; the format adds taurine, sugar and other additives with their own evidence/safety profile covered on its own monograph page, not a reason to prefer it over plain caffeine.' },
+    ];
+    const card = s => { const m = byId[s.id]; if (!m) return ''; const d = m._derived; return `<div class="card prose" style="margin-bottom:1rem">
+      <div class="mono-head" style="align-items:flex-start"><div><h3 style="margin:0 0 .2rem">${monoLink(s.id)}</h3><p class="small mono" style="margin:0 0 .5rem">${esc(s.dose)} · ${esc(s.timing)}</p></div>
+      <div style="display:flex;gap:.4rem;flex-wrap:wrap">${grade(d.best_grade_acute)}${gate(d.safety_gate)}</div></div>
+      <p>${esc(s.what)}</p>${s.rescue ? `<p><strong>Sleep-deprivation rescue:</strong> ${esc(s.rescue)}</p>` : ''}<p class="small muted"><strong>The catch:</strong> ${esc(s.catch_)}</p></div>`; };
+    return `<div class="page-head"><div><h1>The Limitless Pill</h1><p class="lead">There is no NZT-48. Nothing in 101 verified monographs raises a healthy, rested adult to a different cognitive tier — the acute-performance evidence tops out at grade A/B for alertness, reaction time and attention, from a short list of ordinary stimulant and food-derived compounds, each with a real catch. This page assembles the best-supported short-term, single-dose stack from that evidence for a before-the-task cognitive edge, and is explicit about what it does and does not do.</p></div></div>
+    <div class="callout"><strong>What this is, honestly:</strong> a caffeine-led alertness/attention/reaction-time stack with theanine to blunt jitteriness, plus two situational additions — creatine for sleep-deprived rescue only, and American ginseng for working memory. It will make a rested person feel and test faster and more focused for a few hours. It will not create insight, learning capacity, or the fictional step-change Limitless depicts, and it borrows from sleep if timed late in the day.</div>
+    <div class="section"><h2>The acute stack, in order of evidence strength</h2><p class="small muted">Grade shown is the best acute grade on file for that ingredient; gate is the safety-review outcome. Full dosing, interaction and safety detail is on each ingredient's own page — this page is a summary, not a replacement for it.</p>${stack.map(card).join('')}</div>
+    <div class="section prose"><h2>Why not more ingredients?</h2><p>Only ingredients with acute (same-day, single-dose) grade A or B human evidence for an actual cognitive-performance domain — not a biomarker or blood-flow surrogate — qualify for the stack above. 22 acute evidence rows across 11 ingredients met grade A/B with a benefit direction; most collapse into caffeine itself once the overlap is removed. The ones that didn't make the cut, and why:</p>
+      <ul class="compact">${notStack.map(n => `<li>${monoLink(n.id)} — ${esc(n.why)}</li>`).join('')}</ul></div>
+    <div class="section prose"><h2>What this stack will not do</h2><ul class="compact">
+      <li>It will not help a sleep-deprived brain as much as sleep itself — caffeine's own monograph shows it only restores performance for 2–4 h and does not substitute for recovery sleep.</li>
+      <li>It does nothing for learning, long-term memory formation, or exam-week cramming — those outcomes live under <a href="#longterm">Long-term cognitive function</a> and are driven by completely different, slower-acting evidence (sleep, exercise, omega-3 status, not an acute stack).</li>
+      <li>It carries real costs if used daily and late: sleep debt, tolerance, and anxiety in sensitive users. See each ingredient's safety section and the <a href="#safety">safety review</a> before treating this as a routine.</li>
+      <li>None of this is a medical claim, a diagnosis, or a substitute for clinical advice — see the <a href="#regulatory">regulatory &amp; claims</a> page for what can and cannot be said about any of it commercially.</li>
+    </ul></div>`;
+  }
   function viewLongterm() {
     const rows = ROWS.filter(r => r.timeframe !== 'acute');
     const mrows = []; MONOS.forEach(m => (m.longterm_matrix || []).forEach(r => mrows.push(Object.assign({ _m: m }, r))));
@@ -687,13 +729,13 @@
 
   // ---------- navigation ----------
   const NAV = [
-    ['Overview', [['home', 'Home'], ['summary', 'Executive summary'], ['decisions', 'Decision framework'], ['methodology', 'Methodology']]],
+    ['Overview', [['home', 'Home'], ['pill', 'The Limitless Pill'], ['summary', 'Executive summary'], ['decisions', 'Decision framework'], ['methodology', 'Methodology']]],
     ['Evidence', [['database', 'Ingredient database', () => MONOS.length], ['matrix', 'Evidence matrix'], ['compare', 'Compare'], ['acute', 'Acute performance'], ['longterm', 'Long-term function'], ['populations', 'Populations'], ['combinations', 'Combinations'], ['rankings', 'Rankings'], ['myths', 'Myths vs evidence'], ['foundations', 'Foundations']]],
     ['Safety & rules', [['safety', 'Safety review'], ['regulatory', 'Regulatory & claims'], ['claims', 'Claims library']]],
     ['Company', [['competitors', 'Competitors'], ['products', 'Product concepts'], ['costs', 'Ingredient costs'], ['validation', 'Clinical roadmap'], ['instruments', 'Test instruments'], ['brand', 'Brand positioning']]],
     ['Reference', [['bibliography', 'Bibliography', () => BIB.length]]],
   ];
-  const VIEWS = { home: viewHome, summary: viewSummary, decisions: viewDecisions, methodology: viewMethodology, database: viewDatabase, acute: viewAcute, longterm: viewLongterm, populations: viewPopulations, combinations: viewCombinations, rankings: viewRankings, myths: viewMyths, foundations: viewFoundations, safety: viewSafety, regulatory: viewRegulatory, competitors: viewCompetitors, products: viewProducts, costs: viewCosts, validation: viewValidation, instruments: viewInstruments, brand: viewBrand, bibliography: viewBibliography };
+  const VIEWS = { home: viewHome, pill: viewPill, summary: viewSummary, decisions: viewDecisions, methodology: viewMethodology, database: viewDatabase, acute: viewAcute, longterm: viewLongterm, populations: viewPopulations, combinations: viewCombinations, rankings: viewRankings, myths: viewMyths, foundations: viewFoundations, safety: viewSafety, regulatory: viewRegulatory, competitors: viewCompetitors, products: viewProducts, costs: viewCosts, validation: viewValidation, instruments: viewInstruments, brand: viewBrand, bibliography: viewBibliography };
   // in-page router: the current view lives in CURRENT, so navigation works even where the host frame ignores hash changes
   let CURRENT = (location.hash || '#home').slice(1) || 'home';
   function route() { const h = CURRENT || 'home'; const i = h.indexOf('.'); return i < 0 ? { view: h, param: null } : { view: h.slice(0, i), param: decodeURIComponent(h.slice(i + 1)) }; }
