@@ -83,6 +83,11 @@
     alert: '<path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/><path d="M12 9v4M12 17h.01"/>',
     list: '<path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/>',
     lock: '<rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',
+    infinity: '<path d="M12 12c-2-2.67-4-4-6-4a4 4 0 1 0 0 8c2 0 4-1.33 6-4Zm0 0c2 2.67 4 4 6 4a4 4 0 0 0 0-8c-2 0-4 1.33-6 4Z"/>',
+    utensils: '<path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2M7 2v20"/><path d="M21 15V2a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"/>',
+    activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
+    brake: '<path d="M7.9 2h8.2L22 7.9v8.2L16.1 22H7.9L2 16.1V7.9Z"/><path d="M8 12h8"/>',
+    trend: '<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
   };
   const icon = (k, cls) => `<svg class="ic${cls ? ' ' + cls : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k] || ''}</svg>`;
   const BRAND_SVG = '<svg class="brand-mark" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="104" fill="#124e66"/><rect x="106" y="135" width="300" height="62" rx="31" fill="#9fe0c8"/><rect x="106" y="231" width="226" height="62" rx="31" fill="#fff"/><rect x="106" y="327" width="152" height="62" rx="31" fill="#fff"/></svg>';
@@ -94,8 +99,11 @@
     ['profile', 'Your profile type', 'My type', 'user', 'Six questions, then your best habits and pills for today and the long run.'],
     ['goals', 'Best by goal', 'Goals', 'target', 'What works for focus, memory and overall sharpness.'],
     ['database', 'Ingredients', 'Ingredients', 'leaf', `All ${MONOS.length} foods, nutrients, supplements and diets, with grades and safety.`],
+    ['protocol', 'The Limitless Protocol', 'Limitless', 'infinity', 'Remove what limits your brain, then boost it: by food, pill and habit, for today and for years.'],
     ['pill', 'The Limitless Pill', 'Pill', 'pill', 'The best-proven stack, and three recipes: today, this week, for life.'],
   ];
+  // the phone tab bar keeps five tabs: the pill lives under the protocol's tab
+  const TAB_OF = { pill: 'protocol' };
   const LIB = [
     { key: 'evidence', t: 'Explore the evidence', ic: 'grid', d: 'The graded findings, cut nine ways.', items: [
       ['matrix', 'Evidence matrix', 'Every ingredient against every brain outcome, on one screen.', 'table'],
@@ -355,7 +363,7 @@
         <div class="path"><span class="path-ic">${icon('target')}</span><h3>Best by goal</h3><p>Three goals, three different answers, today and long-term.</p>
           <div class="path-goals"><a href="#goals.focus">Focus & attention${icon('chev')}</a><a href="#goals.memory">Memory & learning${icon('chev')}</a><a href="#goals.capacity">Overall sharpness${icon('chev')}</a></div></div>
         <a class="path" href="#database"><span class="path-ic">${icon('leaf')}</span><h3>Look up an ingredient</h3><p>All ${MONOS.length} foods, nutrients, supplements and diets. Each gets a plain yes or no for focus, memory and long-run health.</p><span class="path-go">Browse ingredients ${icon('arrow')}</span></a>
-        <a class="path path-pill" href="#pill"><span class="path-ic">${icon('pill')}</span><h3>The Limitless Pill</h3><p>The best-proven stack for a same-day boost, and three recipes: one for today, one for this week, one for life.</p><span class="path-go">Open the recipes ${icon('arrow')}</span></a>
+        <a class="path path-pill" href="#protocol"><span class="path-ic">${icon('infinity')}</span><h3>The Limitless Protocol</h3><p>First remove what holds your brain back, then boost it: with food, pills and habits, for today and for years. The Limitless Pill is one part of it.</p><span class="path-go">Open the protocol ${icon('arrow')}</span></a>
       </div>
     </section>
 
@@ -693,6 +701,7 @@
     <div class="hero-pill"><div class="nzt-hook"><a href="#nzt48" class="nzt-hook-link" aria-label="What if it didn't have to stop here? Enter The Real NZT-48" title="What if it didn't have to stop here?"><span class="nzt-hook-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-6.5 10-6.5S22 12 22 12s-3.6 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.6"/></svg></span><span class="nzt-hook-q">What if it didn't have to stop here?</span></a></div><div class="page-head" style="margin-bottom:0"><div><h1>The Limitless Pill ${tf('acute')}</h1><p class="lead">There is no NZT-48. Nothing in 101 verified monographs raises a healthy, rested adult to a different cognitive tier — the acute-performance evidence tops out at grade A/B for alertness, reaction time and attention, from a short list of ordinary stimulant and food-derived compounds, each with a real catch. This page assembles the best-supported short-term, single-dose stack from that evidence for a before-the-task cognitive edge, and is explicit about what it does and does not do.</p></div></div></div>
     ${timeline}
     <div class="callout"><strong>What this is, honestly:</strong> a caffeine-led alertness/attention/reaction-time stack with theanine to blunt jitteriness, plus two situational additions — creatine for sleep-deprived rescue only, and American ginseng for working memory. It will make a rested person feel and test faster and more focused for a few hours. It will not create insight, learning capacity, or the fictional step-change Limitless depicts, and it borrows from sleep if timed late in the day.</div>
+    <a class="px-backlink" href="#protocol">${icon('infinity')}<span><strong>The pill is one part of a bigger plan.</strong> The Limitless Protocol first removes what limits your brain, then boosts it, with food, pills and habits, for today and for years.</span>${icon('arrow')}</a>
     <div class="section" id="recipes"><h2>Three recipes, one per timeframe</h2><p class="small muted">Same evidence base as the rest of this page, turned into something you'd actually make: a drink for today, a short protocol for a demanding week, and a daily pattern for the years that actually move long-term cognitive outcomes. Grades and the honest catch are per recipe below.</p>
       <div class="recipe-grid">${recipes.map(recipeCard).join('')}</div></div>
     <div class="section" id="stack-section"><h2>The acute stack, in order of evidence strength</h2><p class="small muted">Grade shown is the best acute grade on file for that ingredient; gate is the safety-review outcome. Full dosing, interaction and safety detail is on each ingredient's own page — this page is a summary, not a replacement for it.</p>
@@ -701,6 +710,178 @@
       <div class="exclusion-grid">${notStack.map(n => `<div class="exclusion-card"><div class="ex-head">${ICON.x}${monoLink(n.id)}</div><p>${esc(n.why)}</p></div>`).join('')}</div></div>
     <div class="section prose"><h2>What this stack will not do</h2><ul class="boundary-list">${boundaries.map(b => `<li>${ICON.dot}<span>${b}</span></li>`).join('')}</ul></div>
     </div>`;
+  }
+
+  // ---------- the Limitless Protocol: remove what limits the brain, then boost it; short and long term; eat / take / do ----------
+  // ev: [monograph id, grade, timeframe] must match a graded row (checked by tools/smoke_test.cjs); syn: graded in a synthesis page;
+  // src: [label, PMID] for non-nutrition levers, which this atlas has not graded, so they are shown as "Not graded here".
+  const PX = {
+    short: {
+      remove: {
+        eat: [
+          { id: 's-water', t: 'Don’t run dry', how: 'A glass of water before a long task; about 2 L (women) to 2.5 L (men) of water a day from all drinks and food', why: 'Losing just 1–2% of body weight as water reliably brings fatigue, low mood and headaches. Drinking fixes it.', ev: [['hydration', 'B', 'acute']], c: 'This restores your baseline; drinking more than you need adds nothing.' },
+          { id: 's-meal', t: 'Keep the meal before hard work light', how: 'A moderate, mixed meal; save the big or fatty one for after', why: 'A heavy meal raises sleepiness and lowers sustained attention for a few hours, on top of the normal afternoon dip.', ev: [['meal-composition-size-and-timing', 'B', 'acute']] },
+        ],
+        take: [
+          { id: 's-rescue', t: 'Slept badly? Caffeine is the rescue', how: '100–200 mg once (one or two strong coffees), at least 9 hours before bed', why: 'Sleep loss is where caffeine works best: large gains in attention and reaction time, comparable to modafinil in the trials that compared them.', ev: [['caffeine', 'A', 'acute']], c: 'It hides tiredness for 2–4 hours; it does not repay the sleep. Not for pregnancy, under-18s, anxiety or heart problems.' },
+          { id: 's-glycine', t: 'Glycine 3 g at bedtime on short-sleep nights', how: '3 g powder in water shortly before bed, for up to 3 nights', why: 'In adults kept on short sleep, it reduced next-day fatigue and improved next-day vigilance.', ev: [['glycine', 'B', 'short_term_days']], c: 'One small trial, funded by the maker. Not tested in well-rested people.' },
+        ],
+        do: [
+          { id: 's-sleep', t: 'Get the sleep back', how: 'Sleep, before anything else on this page', why: 'A night without sleep causes large drops in simple attention, the biggest brake measured across 70 studies. Sleep loss before learning also cuts how much you remember.', src: [['Lim & Dinges 2010', '20438143'], ['Newbury et al. 2021', '35238586']] },
+          { id: 's-cutoff', t: 'Stop caffeine 9+ hours before bed', how: 'Last coffee or tea by about 2 pm for an 11 pm bedtime', why: 'Caffeine taken up to 13 hours before bed cut sleep by about 45 minutes in pooled trials: today’s boost becomes tomorrow’s brake.', ev: [['caffeine', 'A', 'acute']] },
+          { id: 's-nap', t: 'The caffeine nap', how: 'Drink a coffee, then nap 15–20 minutes straight away', why: 'The caffeine starts working as you wake up. It is the only pairing in this atlas that beat its best single part in direct trials.', syn: ['combinations', 'Combinations', 'B'], c: 'Three small trials in sleepy adults; tested for sleepiness and driving, not for learning.' },
+        ],
+      },
+      boost: {
+        eat: [
+          { id: 's-cup', t: 'Coffee, tea or matcha, 30–60 minutes before', how: 'One coffee (about 80–100 mg caffeine) or 2.5–3 g matcha (about 70 mg caffeine and 50 mg L-theanine)', why: 'Faster reactions and steadier attention for a few hours: the best-proven same-day effect, in food form.', ev: [['coffee', 'A', 'acute'], ['tea-and-green-tea', 'B', 'acute']], c: 'A small effect, and in daily drinkers partly the end of overnight withdrawal. Keep tea away from iron-rich meals (see Long-term).' },
+        ],
+        take: [
+          { id: 's-pill', t: 'The Limitless Pill core: caffeine + L-theanine', how: '75–100 mg caffeine with 100–200 mg L-theanine, 30–60 minutes before the task; no more than 2 a day', why: 'Caffeine is grade A for reaction time and attention. Theanine adds smoother focus with less jitter.', ev: [['caffeine', 'A', 'acute'], ['l-theanine', 'B', 'acute']], more: ['pill', 'Open the Limitless Pill'], c: 'Whether theanine adds anything beyond caffeine alone is still unproven. Count every coffee and energy drink toward 400 mg a day.' },
+          { id: 's-ginseng', t: 'Optional: American ginseng (Cereboost)', how: '200 mg standardised extract, 1–3 hours before', why: 'The one herb with repeated same-day working-memory results.', ev: [['american-ginseng-cereboost', 'B', 'acute']], c: 'Four small trials, all with the supplier involved; safety data covers only 14 days. Avoid it with blood thinners or diabetes medicines.' },
+        ],
+        do: [
+          { id: 's-move', t: 'Move before hard thinking', how: 'A brisk walk or light cycling, then start', why: 'A single bout of exercise gives a small lift in cognitive performance, during and after it.', src: [['Chang et al. 2012', '22480735']], c: 'Small on average; larger for some tasks and some exercise intensities.' },
+          { id: 's-test', t: 'Test yourself instead of rereading', how: 'Close the book and recall it, or use flashcards; check, then repeat', why: 'Recalling what you studied makes it stick better than reading it again, especially when you recall from memory rather than just recognise.', src: [['Rowland 2014', '25150680']] },
+        ],
+      },
+    },
+    long: {
+      remove: {
+        eat: [
+          { id: 'l-iron', t: 'Eat iron, and keep tea away from those meals', how: 'Iron-rich foods (meat, fish, legumes); drink tea between meals, not with them', why: 'In Moroccan women, tea with a meal cut iron absorption by more than 85%, and iron deficiency affects about 3 in 10 Moroccan women of reproductive age.', ev: [['tea-and-green-tea', 'A', 'acute']] },
+          { id: 'l-dash', t: 'Less salt, more plants', how: 'Vegetables, fruit, whole grains, low-fat dairy, nuts and legumes; less salt and processed meat (the DASH pattern)', why: 'Lowers blood pressure within weeks, and high blood pressure is a major long-run risk for the brain.', ev: [['dash-diet', 'A', 'chronic']], c: 'The strong evidence is for blood pressure; direct proof that DASH improves thinking is limited.' },
+          { id: 'l-fish', t: 'Oily fish once or twice a week', how: 'Sardines, mackerel or anchovies (low in mercury)', why: 'One portion covers much of the omega-3, B12, iodine and vitamin D that many diets lack. Regular fish eaters show slower memory decline.', ev: [['fish-and-seafood', 'C', 'chronic']], c: 'Observational; nothing shows fish sharpens a healthy young brain.' },
+        ],
+        take: [
+          { note: 'Blood test first: ask for ferritin (iron), vitamin B12 and vitamin D. Correcting a real deficiency is the clearest supplement effect in this atlas. Without one, these pills do nothing for the brain.' },
+          { id: 'l-ironpill', t: 'Iron, only if your ferritin is low', how: 'The dose and duration your doctor sets', why: 'In iron-deficient women and young people it reduced fatigue and modestly raised attention and test scores.', ev: [['iron', 'B', 'chronic']], c: 'No benefit if you are not low, and unneeded iron carries real risks.' },
+          { id: 'l-b12', t: 'Vitamin B12 if you are vegan, vegetarian, older, or on metformin or acid blockers', how: 'A regular B12 supplement', why: 'Deficiency causes nerve and memory damage that can become permanent. Prevention is cheap.', ev: [['vitamin-b12', 'B', 'chronic']], c: 'No benefit for thinking if your B12 is already normal.' },
+          { id: 'l-vitd', t: 'Vitamin D if your level is low', how: 'No more than 4,000 IU (100 µg) a day unless your doctor says otherwise', why: 'Low vitamin D is common in Morocco and is linked to higher dementia risk.', ev: [['vitamin-d', 'C', 'chronic']], c: 'Large trials in people who are not low found no brain benefit.' },
+          { id: 'l-medical', t: 'Medical brakes: treat them with a doctor', how: 'Underactive thyroid, anaemia, sleep apnoea, depression, ADHD, hearing loss', why: 'These are real, treatable limits on the brain. This is where prescription medicine belongs: removing a medical brake, not boosting a healthy brain.', general: true },
+        ],
+        do: [
+          { id: 'l-risks', t: 'Fix the long-run risk factors', how: 'High blood pressure, hearing loss, smoking, inactivity, high LDL cholesterol, too much alcohol', why: 'The 2024 Lancet Commission lists 14 modifiable risk factors and estimates that nearly half of dementia cases could in theory be prevented or delayed by addressing them.', src: [['Livingston et al. 2024, The Lancet', '39096926']] },
+          { id: 'l-sleep', t: 'Make sleep a habit', how: '7 hours or more, night after night', why: 'The consensus of sleep-medicine experts for adults: the floor for a well-running brain.', src: [['AASM/SRS consensus 2015', '26039963']] },
+        ],
+      },
+      boost: {
+        eat: [
+          { id: 'l-med', t: 'Eat the Mediterranean way, most days', how: 'Vegetables, legumes, whole grains, fish, nuts and olive oil; little red meat and few sweets', why: 'Linked to lower dementia risk in long studies. In trials, the gains came when diet was combined with exercise and mental and social activity.', ev: [['mediterranean-diet', 'B', 'chronic'], ['mind-diet', 'B', 'chronic']], c: 'The one 3-year trial of the MIND diet alone found no benefit over a control diet, and none has been run in healthy young adults.' },
+          { id: 'l-nuts', t: 'A handful of nuts, and berries often', how: 'About 30 g of nuts a day; berries a few times a week', why: 'Both improve blood-vessel health, which the brain depends on.', ev: [['nuts-walnuts-almonds', 'B', 'chronic'], ['blueberry-anthocyanins', 'B', 'chronic']], c: 'Better vessels, not proven better thinking: the cognition trials are small and mixed.' },
+        ],
+        take: [
+          { note: 'Honest answer: no pill has strong evidence for making a healthy brain better over months or years. These are the exceptions, each for one group of people.' },
+          { id: 'l-mvm', t: 'A standard multivitamin, if you are over 60', how: 'One multivitamin at about 100% of daily needs', why: 'In the large COSMOS trials it slightly slowed cognitive ageing (about 0.07 SD over 2–3 years).', ev: [['multivitamin-mineral-supplements', 'B', 'chronic']], c: 'A small effect, and an earlier 12-year trial found none. In younger, well-fed adults it changes blood levels, not thinking.' },
+          { id: 'l-creatine', t: 'Creatine, if you eat little meat or fish', how: '3–5 g creatine monohydrate a day, adults only', why: 'Raises brain creatine by about 5–10%, and vegetarians remembered better in a short trial.', ev: [['creatine', 'C', 'short_term_days']], c: 'Little or no effect in meat eaters. The memory trial used 20 g a day for 5 days, above the 5 g daily limit used here. Avoid with kidney disease or in pregnancy.' },
+          { id: 'l-omega', t: 'Omega-3, if you rarely eat fish', how: 'Fish oil, or algae oil if you are vegan, daily', why: 'Small, inconsistent benefits show up mainly in people with a low intake.', ev: [['omega-3-dha-epa', 'C', 'chronic']], c: 'No meaningful boost in well-fed adults in randomised trials.' },
+        ],
+        do: [
+          { id: 'l-exercise', t: 'Exercise most weeks', how: 'Aerobic and strength training, plus mind-body practice such as yoga or tai chi', why: 'Across 54 trials in healthy people, exercise improved overall cognition and every area tested: aerobic most for overall cognition, strength for executive function, mind-body for memory.', src: [['Zhang et al. 2023', '37924980']], c: 'The biggest gains were in older adults.' },
+          { id: 'l-learn', t: 'Learn in spaced sessions', how: 'Review new material again after a gap of days, then weeks, and test yourself each time, instead of cramming', why: 'Spacing beats cramming for long-term recall, and the best gap grows with how long you need to remember.', src: [['Cepeda et al. 2006', '16719566']] },
+        ],
+      },
+    },
+  };
+  const PX_TF = { short: ['Short-term', 'Today → this week', 'zap'], long: ['Long-term', 'Months → years', 'hourglass'] };
+  const PX_ROUTE = { eat: ['utensils', 'Eat', 'Food & drink'], take: ['pill', 'Take', 'The pharmaceutical route: pills & supplements'], do: ['activity', 'Do', 'The non-pharmaceutical route: habits'] };
+  const PX_BRAKES = [
+    ['sleep', 'I sleep less than 7 hours on most nights', ['short', 's-sleep'], ['long', 'l-sleep']],
+    ['late', 'I have coffee, tea or energy drinks after about 2 pm', ['short', 's-cutoff']],
+    ['water', 'I drink little water during the day', ['short', 's-water']],
+    ['lunch', 'I eat a big lunch before afternoon work', ['short', 's-meal']],
+    ['iron', 'I drink tea with meals, or often feel tired and weak', ['long', 'l-iron'], ['long', 'l-ironpill']],
+    ['plant', 'I eat little or no meat, fish or dairy', ['long', 'l-b12'], ['long', 'l-fish']],
+    ['move', 'I rarely exercise', ['long', 'l-exercise'], ['short', 's-move']],
+    ['bp', 'I have high blood pressure, or don’t know mine', ['long', 'l-dash'], ['long', 'l-risks']],
+    ['unwell', 'I have felt low, anxious or unwell for weeks', ['long', 'l-medical']],
+  ];
+  const PX_ITEM = {};
+  Object.keys(PX).forEach(tfk => ['remove', 'boost'].forEach(st => Object.keys(PX[tfk][st]).forEach(r => PX[tfk][st][r].forEach(it => { if (it.id) PX_ITEM[it.id] = it; }))));
+  const pxs = { tab: 'short', brakes: (() => { try { return JSON.parse(localStorage.getItem('bf-brakes') || '[]'); } catch (e) { return []; } })() };
+  function pxItem(it) {
+    if (it.note) return `<p class="px-note">${esc(it.note)}</p>`;
+    const ev = (it.ev || []).map(([id, g]) => `<span class="px-chip">${monoLink(id)}${grade(g)}</span>`).join('');
+    const syn = it.syn ? `<span class="px-chip"><a href="#${esc(it.syn[0])}">${esc(it.syn[1])}</a>${grade(it.syn[2])}</span>` : '';
+    const src = it.src ? `<span class="badge neutral" title="Real, checked sources from outside nutrition research. This atlas has not graded them.">Not graded here</span>${it.src.map(([l, pm]) => `<a class="px-src" href="https://pubmed.ncbi.nlm.nih.gov/${esc(pm)}/" target="_blank" rel="noopener">${esc(l)}</a>`).join('')}` : '';
+    const gen = it.general ? '<span class="badge neutral" title="General medical guidance, outside the scope of this atlas">General medical guidance</span>' : '';
+    return `<article class="px-item" id="px-${esc(it.id)}"${it.ev ? ` data-ev="${esc(it.ev.map(e => e.join(':')).join(' '))}"` : ''}>
+      <h4>${esc(it.t)}</h4><p class="px-how">${esc(it.how)}</p><p class="px-why">${esc(it.why)}</p>
+      <div class="px-ev">${ev}${syn}${src}${gen}</div>
+      ${it.c ? `<p class="px-catch">${icon('alert')}<span>${esc(it.c)}</span></p>` : ''}
+      ${it.more ? `<a class="px-more" href="#${esc(it.more[0])}">${esc(it.more[1])}${icon('arrow')}</a>` : ''}
+    </article>`;
+  }
+  function pxStep(tfk, st) {
+    const S = PX[tfk][st], rm = st === 'remove';
+    return `<section class="px-step ${rm ? 'px-remove' : 'px-boost'}" aria-labelledby="px-h-${tfk}-${st}">
+      <header class="px-step-h"><span class="px-n">${rm ? 1 : 2}</span><div><h3 id="px-h-${tfk}-${st}">${rm ? 'Remove what limits your brain' : 'Boost what drives it'}</h3>
+        <p>${rm ? (tfk === 'short' ? 'The brakes you can release today or this week.' : 'The slow brakes: gaps, risks and medical causes.') : (tfk === 'short' ? 'On a rested, fed brain, these add a real but small edge for a few hours.' : 'Habits that keep a brain working well for years.')}</p></div></header>
+      <div class="px-cols">${['eat', 'take', 'do'].map(r => `<div class="px-col px-col-${r}"><div class="px-col-h">${icon(PX_ROUTE[r][0])}<b>${PX_ROUTE[r][1]}</b><span>${esc(PX_ROUTE[r][2])}</span></div>${S[r].map(pxItem).join('')}</div>`).join('')}</div>
+    </section>`;
+  }
+  function pxResult() {
+    const on = PX_BRAKES.filter(b => pxs.brakes.includes(b[0]));
+    if (!on.length) return '<p class="px-res-empty">Nothing ticked yet. If none of these is true for you, your brakes are already mostly off: go straight to the boosters.</p>';
+    return `<p class="px-res-h"><b>${on.length} brake${on.length > 1 ? 's' : ''} to remove first.</b> These will do more for you than any booster.</p>
+      <ul class="px-res-list">${on.map(b => `<li><span>${esc(b[1])}</span><span class="px-res-go">${b.slice(2).map(([t, id]) => `<button type="button" class="linkish" data-pxgo="${t}:${id}">${esc(PX_ITEM[id].t)}${icon('arrow')}</button>`).join('')}</span></li>`).join('')}</ul>`;
+  }
+  function viewProtocol(param) {
+    if (param === 'short' || param === 'long') pxs.tab = param;
+    const tab = pxs.tab;
+    const leftOut = [
+      ['Prescription stimulants for healthy people', 'Modafinil, methylphenidate and amphetamines are prescription-only and carry real risks. In this atlas they appear only as comparisons: when people were sleep-deprived, caffeine matched them for a few hours.', 'caffeine'],
+      ['The big creatine “rescue” dose', 'A single 14–25 g dose helped sleep-deprived people (grade B), but that is 3–5 times the 5 g daily limit used here.', 'creatine'],
+      ['Huperzine A and vinpocetine', 'Excluded: they fail a hard safety or legal requirement.', 'huperzine-a-and-vinpocetine'],
+      ['Ginkgo biloba', 'Close to no effect in healthy adults, and a bleeding risk with blood thinners.', 'ginkgo-biloba'],
+      ['Energy drinks and stacked caffeine', 'The same caffeine, harder to count: the easiest way past 400 mg a day without noticing.', 'energy-drinks-and-stimulant-beverages'],
+      ['Experimental brain drugs', 'Ampakines, orexin drugs and similar compounds are still in trials for diseases. None is approved to boost a healthy brain, so they stay research only.', null],
+    ];
+    const plan = [
+      ['Week 1', 'Find your brakes', 'Do the check above. Fix your sleep and the 2 pm caffeine cut-off. Book a blood test.'],
+      ['Weeks 2–4', 'Remove them', 'Correct what the test shows. Start moving most days and switch to the long-term plate.'],
+      ['Then', 'Boost on the days that matter', 'The pill core or a matcha before hard work; test yourself while you learn.'],
+      ['Always', 'Keep the habits', 'The long-term habits are the protocol. Boosters stay occasional.'],
+    ];
+    return `<div class="px-page">
+    <header class="px-hero">
+      <div class="eyebrow">Brain Food protocol</div>
+      <h1>The Limitless Protocol</h1>
+      <p class="lead">No pill makes a brain limitless. The closest real thing is a protocol: <strong>first remove what holds your brain back, then add what pushes it forward</strong>, today and over the years, through what you eat, what you take and what you do.</p>
+      <div class="px-formula" aria-label="How the protocol works">
+        <span class="px-f px-f-rm">${icon('brake')}<span><small>Step 1</small>Remove what limits</span></span>${icon('arrow', 'px-f-arrow')}<span class="px-f px-f-up">${icon('trend')}<span><small>Step 2</small>Boost what drives</span></span>
+        <span class="px-f-routes">${['eat', 'take', 'do'].map(r => `<span>${icon(PX_ROUTE[r][0])}${PX_ROUTE[r][1]}</span>`).join('')}</span>
+      </div>
+    </header>
+
+    <div class="callout info px-why-first"><strong>Why remove first?</strong> Most of what a brain booster seems to do is release a brake. In this atlas, caffeine’s effect on reaction time is about four times larger in sleep-deprived people (g = 1.11) than in rested people (g = 0.28). On a rested, well-fed brain, every booster here adds a small edge, not a new brain.</div>
+
+    <section class="px-check" aria-labelledby="px-check-h">
+      <div class="px-check-head"><span class="px-n">0</span><div><h2 id="px-check-h">Find your brakes</h2><p>Tick what is true for you. Each tick points to its fix.</p></div></div>
+      <div class="px-brakes">${PX_BRAKES.map(([k, l]) => `<label class="px-brake"><input type="checkbox" data-brake="${k}"${pxs.brakes.includes(k) ? ' checked' : ''}><span>${esc(l)}</span></label>`).join('')}</div>
+      <div class="px-result" id="px-result" aria-live="polite">${pxResult()}</div>
+      <p class="pf-privacy">${icon('lock')}Your ticks stay in this browser; nothing is sent anywhere.</p>
+    </section>
+
+    <div class="px-tabs" role="tablist" aria-label="Timeframe" id="px-tabs">${Object.keys(PX_TF).map(k => `<button type="button" role="tab" id="px-tab-${k}" aria-controls="px-pane-${k}" aria-selected="${tab === k}" tabindex="${tab === k ? 0 : -1}" data-ptab="${k}">${icon(PX_TF[k][2])}<span><b>${PX_TF[k][0]}</b><small>${PX_TF[k][1]}</small></span></button>`).join('')}</div>
+    ${Object.keys(PX_TF).map(k => `<div class="px-pane" role="tabpanel" id="px-pane-${k}" aria-labelledby="px-tab-${k}" data-pane="${k}"${tab === k ? '' : ' hidden'}><h2 class="px-pane-h sr">${PX_TF[k][0]}: ${PX_TF[k][1].toLowerCase()}</h2>${pxStep(k, 'remove')}${pxStep(k, 'boost')}</div>`).join('')}
+
+    <section class="section"><h2>A simple order to run it</h2>
+      <ol class="px-plan">${plan.map(([w, t, d]) => `<li><span class="px-plan-w">${esc(w)}</span><b>${esc(t)}</b><span>${esc(d)}</span></li>`).join('')}</ol>
+      <p class="small">A suggested order, not a tested programme.</p></section>
+
+    <section class="section"><h2>Left out on purpose</h2>
+      <div class="px-out">${leftOut.map(([t, d, id]) => `<div class="px-out-i">${icon('xcircle')}<div><b>${esc(t)}</b><p>${esc(d)}${id ? ` ${monoLink(id)}` : ''}</p></div></div>`).join('')}</div></section>
+
+    <div class="callout px-fine"><strong>How to read this page.</strong> Grades come from this atlas and belong to the study group named on each ingredient page. Items marked <span class="badge neutral">Not graded here</span> come from research outside nutrition (sleep, exercise, learning). Their sources are real and checked against PubMed, but they have not been graded with this atlas’s method. Not medical advice: if you are pregnant, under 18, take medicines or have a health condition, talk to a doctor before taking any supplement.</div>
+    </div>`;
+  }
+  function setPxTab(app, t) {
+    pxs.tab = t;
+    app.querySelectorAll('[data-ptab]').forEach(b => { const on = b.dataset.ptab === t; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
+    app.querySelectorAll('.px-pane').forEach(p => { p.hidden = p.dataset.pane !== t; });
+    CURRENT = 'protocol.' + t;
+    try { history.replaceState(null, '', '#' + CURRENT); } catch (e) { /* sandboxed frame */ }
   }
 
   function viewNZT48() {
@@ -1390,8 +1571,8 @@
   function renderTabbar() {
     const tb = document.getElementById('tabbar');
     if (!tb) return;
-    const cur = navKey(route().view);
-    tb.innerHTML = PRIMARY.map(([k, , s, ic]) => `<a href="#${k}"${cur === k ? ' class="active" aria-current="page"' : ''}>${icon(ic)}<span>${esc(s)}</span></a>`).join('');
+    const v = navKey(route().view), cur = TAB_OF[v] || v;
+    tb.innerHTML = PRIMARY.filter(([k]) => !TAB_OF[k]).map(([k, , s, ic]) => `<a href="#${k}"${cur === k ? ' class="active" aria-current="page"' : ''}>${icon(ic)}<span>${esc(s)}</span></a>`).join('');
   }
   function setDrawer(open) {
     const r = document.getElementById('rail'), sc = document.getElementById('scrim'), mb = document.getElementById('menuBtn');
@@ -1421,7 +1602,7 @@
     const s = q.trim().toLowerCase();
     const ingItem = m => ({ href: '#ingredient.' + m.id, t: m.name, s: m.category_name, ic: 'leaf', m });
     const pageItem = p => ({ href: '#' + p.k, t: p.t, s: p.d, ic: p.ic });
-    if (!s) return [['Go to', ALL_PAGES.slice(0, 5).map(pageItem)], ['Popular ingredients', ['caffeine', 'creatine', 'l-theanine', 'omega-3-dha-epa', 'bacopa-monnieri'].filter(id => byId[id]).map(id => ingItem(byId[id]))]];
+    if (!s) return [['Go to', ALL_PAGES.slice(0, PRIMARY.length).map(pageItem)], ['Popular ingredients', ['caffeine', 'creatine', 'l-theanine', 'omega-3-dha-epa', 'bacopa-monnieri'].filter(id => byId[id]).map(id => ingItem(byId[id]))]];
     const words = s.split(/\s+/).filter(Boolean);
     const score = (head, body) => { let sc = 0; for (const w of words) { if (head.startsWith(w)) sc += 6; else if (new RegExp('\\b' + escRe(w)).test(head)) sc += 4; else if (head.includes(w)) sc += 2; else if (body.includes(w)) sc += 1; else return 0; } return sc; };
     const ings = MONOS.map(m => ({ m, sc: score(m.name.toLowerCase(), [(m.aliases || []).join(' '), (m.food_sources || []).join(' '), m.category_name].join(' ').toLowerCase()) })).filter(x => x.sc)
@@ -1527,6 +1708,7 @@
       else if (view === 'claims') html = viewClaims();
       else if (view === 'search') html = viewSearch(param);
       else if (view === 'profile') html = viewProfile(param);
+      else if (view === 'protocol') html = viewProtocol(param);
       else if (VIEWS[view]) html = VIEWS[view]();
       else html = `<div class="page-head"><div><h1>Page not found</h1><p class="lead">This address does not match a page. <a href="#home">Go to the start page</a> or press <kbd>/</kbd> to search.</p></div></div>`;
     } catch (e) { html = `<h1>Rendering error</h1><pre>${esc(e.stack || e)}</pre>`; console.error(e); }
@@ -1553,6 +1735,21 @@
       if (anc && anc.getBoundingClientRect) { const top = anc.getBoundingClientRect().top + window.scrollY - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--topbar-h')) || 0) - 6; if (window.scrollY > top) window.scrollTo({ top, behavior: 'smooth' }); }
     }));
     { const tl = app.querySelector('.itabs'); if (tl && tl.addEventListener && view === 'ingredient') tl.addEventListener('keydown', e => { if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return; const bs = Array.from(tl.querySelectorAll('[data-itab]')); const i = bs.findIndex(b => b.dataset.itab === ist.tab); const nb = bs[(i + (e.key === 'ArrowRight' ? 1 : bs.length - 1)) % bs.length]; setITab(app, nb.dataset.itab); nb.focus(); }); }
+    // protocol: timeframe tabs, brake check, jump from a brake to its fix
+    app.querySelectorAll('[data-ptab]').forEach(b => b.addEventListener('click', () => setPxTab(app, b.dataset.ptab)));
+    { const tl = document.getElementById('px-tabs'); if (tl && tl.addEventListener && view === 'protocol') tl.addEventListener('keydown', e => { if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return; const nt = pxs.tab === 'short' ? 'long' : 'short'; setPxTab(app, nt); const b = document.getElementById('px-tab-' + nt); if (b) b.focus(); }); }
+    app.querySelectorAll('[data-brake]').forEach(cb => cb.addEventListener('change', () => {
+      const k = cb.dataset.brake;
+      pxs.brakes = pxs.brakes.filter(x => x !== k).concat(cb.checked ? [k] : []);
+      try { localStorage.setItem('bf-brakes', JSON.stringify(pxs.brakes)); } catch (e) { /* storage blocked */ }
+      const r = document.getElementById('px-result'); if (r) r.innerHTML = pxResult();
+    }));
+    { const pr = document.getElementById('px-result'); if (pr && pr.addEventListener && view === 'protocol') pr.addEventListener('click', e => {
+      const b = e.target && e.target.closest ? e.target.closest('[data-pxgo]') : null; if (!b) return;
+      const [t, id] = b.dataset.pxgo.split(':'); setPxTab(app, t);
+      const el = document.getElementById('px-' + id);
+      if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.add('px-flash'); setTimeout(() => el.classList.remove('px-flash'), 1800); }
+    }); }
     app.querySelectorAll('a.ref[data-ref]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); const el = document.getElementById('study-' + a.dataset.ref); if (el) { const p = el.closest('.tabpane'); if (p && p.hidden) setITab(app, p.dataset.tab); el.open = true; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }));
     app.querySelectorAll('.toc a[data-jump]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); const el = document.getElementById(a.dataset.jump); if (el) el.scrollIntoView({ behavior: 'smooth' }); }));
     app.querySelectorAll('.tabs').forEach(tabs => tabs.querySelectorAll('button[data-tab]').forEach(b => b.addEventListener('click', () => { tabs.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b)); const pane = tabs.parentElement; pane.querySelectorAll('.tabpane').forEach(p => { p.hidden = p.id !== b.dataset.tab; }); })));
