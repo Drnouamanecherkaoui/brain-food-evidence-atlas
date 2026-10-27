@@ -7,8 +7,8 @@
 <meta name="description" content="NEUROFUEL LAB research database: verified human evidence on nutrition and cognitive performance, with safety, regulatory and product analysis for the Brain Food brand.">
 <!-- unlisted while the research is in draft: remove this line (and robots.txt) to allow search indexing -->
 <meta name="robots" content="noindex, nofollow">
-<meta name="theme-color" content="#124e66" media="(prefers-color-scheme: light)">
-<meta name="theme-color" content="#0f1419" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#111827" media="(prefers-color-scheme: dark)">
 <meta name="color-scheme" content="light dark">
 <meta property="og:title" content="Brain Food Evidence Atlas">
 <meta property="og:description" content="Graded, citation-verified human evidence on nutrition and cognition, with safety, regulatory and product analysis.">
@@ -20,34 +20,41 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;0,9..144,700;1,9..144,500&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
-<link rel="stylesheet" href="styles.css?v=1011fa1f6e">
+<link rel="stylesheet" href="styles.css?v=acfc140434">
 </head>
 <body>
-<div class="topbar">
-  <a class="name topbar-brand" href="#home">
+<a class="skip-link" href="#app">Skip to content</a>
+<header class="topbar">
+  <a class="topbar-brand" href="#home">
     <svg class="brand-mark" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="104" fill="#124e66"/><rect x="106" y="135" width="300" height="62" rx="31" fill="#9fe0c8"/><rect x="106" y="231" width="226" height="62" rx="31" fill="#fff"/><rect x="106" y="327" width="152" height="62" rx="31" fill="#fff"/></svg>
-    <span>Brain Food Evidence Atlas</span>
+    <span>Brain Food</span>
   </a>
-  <button id="menuBtn" type="button" aria-controls="rail" aria-expanded="false">Menu</button>
-</div>
+  <div class="topbar-actions">
+    <button type="button" class="icon-btn" data-open="palette" aria-label="Search"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20.5 20.5-4.2-4.2"/></svg></button>
+    <button type="button" class="icon-btn" data-open="help" aria-label="How to read the grades"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.5"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+    <button type="button" class="icon-btn" id="menuBtn" aria-controls="rail" aria-expanded="false" aria-label="Menu"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+  </div>
+</header>
 <div class="scrim" id="scrim" hidden></div>
 <div class="shell">
   <aside class="rail" id="rail" aria-label="Sections">
     <div class="brand">
       <a class="name" href="#home">
         <svg class="brand-mark" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="104" fill="#124e66"/><rect x="106" y="135" width="300" height="62" rx="31" fill="#9fe0c8"/><rect x="106" y="231" width="226" height="62" rx="31" fill="#fff"/><rect x="106" y="327" width="152" height="62" rx="31" fill="#fff"/></svg>
-        <span>Brain Food Evidence Atlas</span>
+        <span><b>Brain Food</b><small>Evidence Atlas</small></span>
       </a>
-      <span class="tag">NEUROFUEL LAB · nutrition × cognition · verified human evidence</span>
+      <button type="button" class="icon-btn rail-close" id="railClose" aria-label="Close menu"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
     </div>
     <nav class="nav" id="nav"></nav>
   </aside>
-  <main id="app" class="wrap" aria-live="polite"></main>
+  <main id="app" class="wrap" tabindex="-1"></main>
 </div>
-<script src="data/meta.js?v=1011fa1f6e"></script>
-<script src="data/monographs.js?v=1011fa1f6e"></script>
-<script src="data/syntheses.js?v=1011fa1f6e"></script>
-<script src="data/bibliography.js?v=1011fa1f6e"></script>
-<script src="app.js?v=1011fa1f6e"></script>
+<nav class="tabbar" id="tabbar" aria-label="Main"></nav>
+<div id="overlay-root"></div>
+<script src="data/meta.js?v=acfc140434"></script>
+<script src="data/monographs.js?v=acfc140434"></script>
+<script src="data/syntheses.js?v=acfc140434"></script>
+<script src="data/bibliography.js?v=acfc140434"></script>
+<script src="app.js?v=acfc140434"></script>
 </body>
 </html>
