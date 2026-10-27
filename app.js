@@ -88,9 +88,37 @@
     activity: '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/>',
     brake: '<path d="M7.9 2h8.2L22 7.9v8.2L16.1 22H7.9L2 16.1V7.9Z"/><path d="M8 12h8"/>',
     trend: '<path d="m22 7-8.5 8.5-5-5L2 17"/><path d="M16 7h6v6"/>',
+    // ingredient categories
+    bowl: '<path d="M3 11h18a9 9 0 0 1-18 0Z"/><path d="M8 7.5c0-1.2.8-1.8.8-3M12 7.5c0-1.2.8-1.8.8-3M16 7.5c0-1.2.8-1.8.8-3"/>',
+    citrus: '<circle cx="12" cy="12" r="9"/><path d="M12 3v18M4.2 7.5l15.6 9M4.2 16.5l15.6-9"/>',
+    gem: '<path d="M6 3h12l4 6-10 12L2 9Z"/><path d="M2 9h20M12 21 8 9l2-6M12 21l4-12-2-6"/>',
+    drop: '<path d="M12 2.7s7 7.3 7 12.3a7 7 0 0 1-14 0c0-5 7-12.3 7-12.3Z"/><path d="M9.3 15.3a2.8 2.8 0 0 0 2.7 2.7"/>',
+    molecule: '<circle cx="6" cy="7" r="2.5"/><circle cx="18" cy="7" r="2.5"/><circle cx="12" cy="17.5" r="2.5"/><path d="M8.5 7h7M7.3 9.2l3.5 6.1M16.7 9.2l-3.5 6.1"/>',
+    coffee: '<path d="M17 8h1a4 4 0 1 1 0 8h-1"/><path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/><path d="M7 2v3M11 2v3M15 2v3"/>',
+    berries: '<circle cx="7.5" cy="15.5" r="4"/><circle cx="16.5" cy="15.5" r="4"/><path d="M7.5 11.5C8 7 10 4.5 13 3M16.5 11.5C16 8 14.5 5 13 3"/>',
+    sprout: '<path d="M12 21v-9M8 21h8"/><path d="M12 12C12 7.6 9.2 5 4.5 5c0 4.6 2.8 7 7.5 7Z"/><path d="M12 14c0-3.8 2.4-6 6.5-6 0 3.9-2.4 6-6.5 6Z"/>',
+    microbe: '<rect x="3" y="7" width="18" height="10" rx="5"/><path d="M8 12h.01M12 10.5h.01M15.5 13h.01M21 12h1.5M1.5 12H3M8 7V5M16 17v2"/>',
+    apple: '<path d="M12 7c-1.4-1-2.8-1.4-4.2-1.4C4.6 5.6 3 8.2 3 11.4 3 15.8 6.2 21 8.8 21c1.2 0 1.9-.6 3.2-.6s2 .6 3.2.6c2.6 0 5.8-5.2 5.8-9.6 0-3.2-1.6-5.8-4.8-5.8-1.4 0-2.8.4-4.2 1.4Z"/><path d="M12 7c0-2.2.9-3.6 2.8-4.2"/>',
+    plate: '<circle cx="12.5" cy="12" r="6.5"/><circle cx="12.5" cy="12" r="3"/><path d="M2.5 4v6a1.5 1.5 0 0 0 3 0V4M4 11.5V20M21.5 4c-1.2 0-1.8 2-1.8 5s.6 3.5 1.8 3.5V20"/>',
+    // answers and directions
+    checkc: '<circle cx="12" cy="12" r="9"/><path d="m8.2 12.3 2.6 2.6 5-5.2"/>',
+    halfc: '<circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18Z" fill="currentColor" stroke="none"/>',
+    tildec: '<circle cx="12" cy="12" r="9"/><path d="M7.5 13c1.3-2 2.8-2 4.5 0s3.2 2 4.5 0"/>',
+    minusc: '<circle cx="12" cy="12" r="9" stroke-dasharray="2.4 2.6"/><path d="M8.5 12h7"/>',
+    up: '<path d="M12 19V5M5.5 11.5 12 5l6.5 6.5"/>',
+    down: '<path d="M12 5v14M5.5 12.5 12 19l6.5-6.5"/>',
+    flat: '<path d="M5 12h14"/>',
+    wave: '<path d="M3 12c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/>',
+    clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
   };
   const icon = (k, cls) => `<svg class="ic${cls ? ' ' + cls : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k] || ''}</svg>`;
-  const BRAND_SVG = '<svg class="brand-mark" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="104" fill="#124e66"/><rect x="106" y="135" width="300" height="62" rx="31" fill="#9fe0c8"/><rect x="106" y="231" width="226" height="62" rx="31" fill="#fff"/><rect x="106" y="327" width="152" height="62" rx="31" fill="#fff"/></svg>';
+  // every ingredient wears its category's icon, so lists can be scanned by shape
+  const CAT_IC = { A: 'bowl', B: 'citrus', C: 'gem', D: 'drop', E: 'molecule', F: 'coffee', G: 'berries', H: 'sprout', I: 'microbe', J: 'apple', K: 'plate' };
+  const catAv = (m, cls) => `<span class="cat-av${cls ? ' ' + cls : ''}" title="${esc(m.category_name)}">${icon(CAT_IC[m.category] || 'leaf')}</span>`;
+  // plain answers ("does it help?") always travel with an icon, never colour alone
+  const VERDICT = { 'Yes': ['checkc', 'v-yes'], 'In some groups': ['users', 'v-some'], 'Maybe': ['halfc', 'v-maybe'], 'Unclear': ['tildec', 'v-unclear'], 'No': ['xcircle', 'v-no'], 'No, may harm': ['alert', 'v-harm'], 'Not studied': ['minusc', 'v-none'] };
+  const vIcon = a => { const v = VERDICT[a] || VERDICT.Unclear; return `<span class="vi ${v[1]}">${icon(v[0])}</span>`; };
+  const BRAND_SVG ='<svg class="brand-mark" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="104" fill="#124e66"/><rect x="106" y="135" width="300" height="62" rx="31" fill="#9fe0c8"/><rect x="106" y="231" width="226" height="62" rx="31" fill="#fff"/><rect x="106" y="327" width="152" height="62" rx="31" fill="#fff"/></svg>';
 
   // ---------- site map: five everyday destinations + a four-shelf research library ----------
   // [route, label, short label (phone tab bar), icon, one-line description]
@@ -334,7 +362,7 @@
     const today = bestPerIngredient(r => eligibleBenefit(r) && r.timeframe === 'acute').filter(r => 'AB'.includes(r.grade)).slice(0, 5);
     const later = bestPerIngredient(r => eligibleBenefit(r) && r.timeframe === 'chronic').filter(r => 'AB'.includes(r.grade)).slice(0, 5);
     const nope = bestPerIngredient(r => r.direction === 'no_benefit' && 'AB'.includes(r.grade)).slice(0, 5);
-    const evItem = (r, showTf) => `<li><a class="ev-item" href="#ingredient.${esc(r._m.id)}">${grade(r.grade)}<span class="ev-b"><strong>${esc(r._m.name)}</strong><small>${esc(lab(DOMAIN_LABEL, r.domain))} · ${esc(popWord(r.population))}</small></span>${showTf ? tf(r.timeframe) : ''}</a></li>`;
+    const evItem = (r, showTf) => `<li><a class="ev-item" href="#ingredient.${esc(r._m.id)}">${catAv(r._m, 'sm')}<span class="ev-b"><strong>${esc(r._m.name)}</strong><small>${showTf ? tf(r.timeframe) + ' ' : ''}${esc(lab(DOMAIN_LABEL, r.domain))} · ${esc(popWord(r.population))}</small></span><span class="ev-g">${grade(r.grade)}</span></a></li>`;
     const gcol = (cls, ic, title, sub, rows, more, showTf) => `<div class="gcol ${cls}"><div class="gcol-h"><span class="gcol-ic">${icon(ic)}</span><h3>${title}</h3></div><p class="gcol-sub">${sub}</p>
       <ul class="ev-items">${rows.map(r => evItem(r, showTf)).join('')}</ul>${more}</div>`;
     const last = lastProfile();
@@ -454,7 +482,7 @@
     const so = SORTS.find(s => s[0] === dbs.sort) || SORTS[0];
     list.sort((a, b) => so[2](a, b) || (dbs.sort === 'az' ? 0 : b._derived.composite_score - a._derived.composite_score));
     const row = m => `<a class="ing-row" href="#ingredient.${esc(m.id)}" data-n="${esc(m.name.toLowerCase())}" data-s="${esc([m.name, (m.aliases || []).join(' '), (m.food_sources || []).join(' '), m.category_name].join(' ').toLowerCase())}">
-      <span class="ing-main"><span class="ing-name">${esc(m.name)}<span class="ing-cat">${esc(m.category_name)}</span></span><span class="ing-verdict">${esc(m.one_line_verdict)}</span></span>
+      <span class="ing-main">${catAv(m)}<span class="ing-tx"><span class="ing-name">${esc(m.name)}<span class="ing-cat">${esc(m.category_name)}</span></span>${vTrio(m)}<span class="ing-verdict">${esc(m.one_line_verdict)}</span></span></span>
       <span class="ing-g"><span class="ing-gl">Today</span>${grade(m._derived.best_grade_acute)}</span>
       <span class="ing-g"><span class="ing-gl">Long-term</span>${grade(m._derived.best_grade_chronic)}</span>
       <span class="ing-g"><span class="ing-gl">Safe &amp; legal</span>${gate(eligGate(m))}</span>${icon('chev')}</a>`;
@@ -535,7 +563,8 @@
     const row = (label, f) => `<tr><th class="rowh">${esc(label)}</th>${ms.map(m => `<td class="wrap">${f(m)}</td>`).join('')}</tr>`;
     const benefitList = m => { const b = m._derived.benefit_domains || {}; const k = Object.keys(b).sort((x, y) => GR[b[y]] - GR[b[x]]); return k.length ? k.map(d => `${grade(b[d])} ${esc(lab(DOMAIN_LABEL, d))}`).join('<br>') : '<span class="muted">none</span>'; };
     const nulls = m => { const r = (m.evidence_by_outcome || []).filter(x => x.direction === 'no_benefit' && ['A', 'B'].includes(x.grade)); return r.length ? r.map(x => `${grade(x.grade)} ${esc(lab(DOMAIN_LABEL, x.domain))} · ${esc(lab(POP_LABEL, x.population))}`).join('<br>') : '<span class="muted">none</span>'; };
-    const table = ms.length ? `<div class="tbl-wrap"><table class="tbl cmp"><thead><tr><th class="rowh"></th>${ms.map(m => `<th><a href="#ingredient.${esc(m.id)}">${esc(m.name)}</a></th>`).join('')}</tr></thead><tbody>
+    const table = ms.length ? `<div class="tbl-wrap"><table class="tbl cmp"><thead><tr><th class="rowh"></th>${ms.map(m => `<th><span class="cmp-h">${catAv(m, 'sm')}<a href="#ingredient.${esc(m.id)}">${esc(m.name)}</a></span></th>`).join('')}</tr></thead><tbody>
+      ${row('Does it help?', m => `<span class="cmp-qa">${QA_GOALS.map(([q, , doms, onlyTf], i) => { const x = quickAnswer(m, doms, onlyTf); return `<span class="qa-a ${(VERDICT[x.a] || VERDICT.Unclear)[1]}">${vIcon(x.a)}<span><small>${VT_SHORT[i]}</small>${esc(x.a)}</span></span>`; }).join('')}</span>`)}
       ${row('Verdict', m => esc(m.one_line_verdict))}
       ${row('Eligibility', m => `${gate(m._derived.safety_gate)} safety<br>${gate(m._derived.regulatory_gate)} regulatory`)}
       ${row('Composite score', m => `<strong class="mono">${m._derived.composite_score.toFixed(1)}</strong> / 10`)}
@@ -608,21 +637,101 @@
       { key: 'st', label: 'Studies', sort: false, render: r => (r.study_ids || []).map(s => `<a href="#ingredient.${esc(r._m.id)}" title="see study ${esc(s)} in the monograph">${esc(s)}</a>`).join(', ') },
     ], filters: [{ key: 'cat', label: 'Category', options: CAT_OPTS, match: (r, v) => r._m.category === v }], search: (r, q) => (r._m.name + ' ' + r.domain + ' ' + r.population).toLowerCase().includes(q) })}</div>`;
   }
+  // ---------- figures: horizontal bars on one shared scale (effect sizes, time windows, caffeine amounts) ----------
+  // row: { l, s, segs: [{ a, b, cls }], lab, tip, ev, src: [label, 'pm:PMID' | 'ing:id'] } or { group }
+  // cls: 'boost' | 'cost', plus 'lite' (range / "up to") or 'fade' (uncertain end). Every figure ships a table twin.
+  function barFig(o) {
+    const pct = v => Math.max(0, Math.min(100, v / o.max * 100)).toFixed(2);
+    const srcLink = s => !s ? '' : s[1].startsWith('pm:') ? `<a href="https://pubmed.ncbi.nlm.nih.gov/${esc(s[1].slice(3))}/" target="_blank" rel="noopener">${esc(s[0])}</a>` : `<a href="#ingredient.${esc(s[1].slice(4))}">${esc(s[0])}</a>`;
+    const ticks = (o.ticks || []).map(([v, , ref]) => `<i class="bf-tick${ref ? ' ref' : ''}" style="left:${pct(v)}%"></i>`).join('');
+    const rows = o.rows.map(r => r.group ? `<div class="bf-group">${esc(r.group)}</div>` : `<div class="bf-row" tabindex="0" data-tip="${esc(r.tip || '')}"${r.ev ? ` data-ev="${esc(r.ev)}"` : ''}>
+        <div class="bf-l"><b>${esc(r.l)}</b>${r.s ? `<small>${esc(r.s)}</small>` : ''}</div>
+        <div class="bf-track">${ticks}${r.segs.map(s => `<span class="bf-bar ${s.cls}" style="left:${pct(s.a)}%;width:${(pct(s.b) - pct(s.a)).toFixed(2)}%"></span>`).join('')}${valueLabel(r)}</div></div>`).join('');
+    // a value near the right edge sits inside the bar end instead of overflowing the track (white on a solid fill)
+    function valueLabel(r) {
+      const end = Math.max(...r.segs.map(s => s.b)), last = r.segs[r.segs.length - 1];
+      if (end / o.max <= 0.62) return `<span class="bf-v" style="left:${pct(end)}%">${esc(r.lab)}</span>`;
+      return `<span class="bf-v flip${/lite|fade/.test(last.cls) ? '' : ' inv'}" style="right:${(100 - pct(end)).toFixed(2)}%">${esc(r.lab)}</span>`;
+    }
+    const axis = `<div class="bf-row bf-axis" aria-hidden="true"><div class="bf-l"></div><div class="bf-track">${(o.ticks || []).map(([v, l, ref]) => `<span class="bf-at${ref ? ' ref' : ''}${v <= 0 ? ' start' : v / o.max > 0.9 ? ' end' : ''}" style="left:${pct(v)}%">${esc(l)}</span>`).join('')}</div></div>`;
+    const table = o.table ? `<details class="fig-table"><summary>Show as a table, with sources</summary><div class="tbl-wrap"><table class="tbl"><thead><tr>${o.table.head.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${o.rows.filter(r => !r.group).map(r => `<tr>${o.table.cells(r).map((c, i) => `<td${i ? ' class="wrap"' : ''}>${i === o.table.head.length - 1 ? srcLink(r.src) : esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div></details>` : '';
+    return `<figure class="fig barfig${o.cls ? ' ' + o.cls : ''}"${o.id ? ` id="${o.id}"` : ''}>
+      <figcaption class="fig-h"><b>${esc(o.title)}</b>${o.sub ? `<span>${esc(o.sub)}</span>` : ''}</figcaption>
+      ${o.legend ? `<div class="fig-legend">${o.legend.map(([c, l]) => `<span><i class="sw ${c}"></i>${esc(l)}</span>`).join('')}</div>` : ''}
+      <div class="bf">${rows}${axis}</div>
+      ${o.note ? `<p class="fig-note">${o.note}</p>` : ''}${table}</figure>`;
+  }
+  // effect sizes: what a brake costs vs what a booster adds (|g| or |SMD|; signs dropped, outcomes differ)
+  function brakesFigure() {
+    const one = v => [{ a: 0, b: v, cls: '' }];
+    const rows = [
+      { group: 'Brakes: what the problem costs you' },
+      { l: 'One night without sleep', s: 'lapses in simple attention', segs: one(0.78), lab: '0.78', cls: 'cost', tip: 'Hedges’ g −0.78 (95% CI −0.96 to −0.60) across 70 studies. Lim & Dinges 2010. Not graded here.', src: ['Lim & Dinges 2010', 'pm:20438143'], who: 'Healthy adults, under 48 h awake' },
+      { l: 'Sleep loss before learning', s: 'how much you later remember', segs: one(0.62), lab: '0.62', cls: 'cost', tip: 'Hedges’ g 0.62 (0.47–0.77). Newbury et al. 2021. Not graded here.', src: ['Newbury et al. 2021', 'pm:35238586'], who: 'Adults, one night of total sleep loss' },
+      { l: 'Low iron, corrected', s: 'intelligence-test scores', segs: one(0.46), lab: '0.46', cls: 'cost', tip: 'SMD 0.46 when school-age children were given iron; larger in anaemic children. Atlas grade B.', ev: 'iron:B:chronic', src: ['Iron', 'ing:iron'], who: 'School-age children (mostly low- and middle-income countries)' },
+      { group: 'Boosters' },
+      { l: 'Caffeine, sleep-deprived', s: 'reaction time', segs: one(1.11), lab: '1.11', cls: 'boost', tip: 'g 1.11 (0.75–1.47). Atlas grade A. A brake being released: rested, the same caffeine gives 0.28.', ev: 'caffeine:A:acute', src: ['Caffeine', 'ing:caffeine'], who: 'Sleep-deprived adults' },
+      { l: 'L-theanine', s: 'choice reaction time, about 18 ms faster', segs: one(0.35), lab: '0.35', cls: 'boost', tip: 'SMD −0.35 (−0.61 to −0.10). Atlas grade B.', ev: 'l-theanine:B:acute', src: ['L-theanine', 'ing:l-theanine'], who: 'Healthy young adults' },
+      { l: 'Caffeine + L-theanine', s: 'attention-switching accuracy', segs: one(0.33), lab: '0.33', cls: 'boost', tip: 'SMD 0.33 (0.13–0.54). Atlas grade B.', ev: 'l-theanine:B:acute', src: ['L-theanine', 'ing:l-theanine'], who: 'Healthy young adults' },
+      { l: 'Caffeine, rested', s: 'reaction time', segs: one(0.28), lab: '0.28', cls: 'boost', tip: 'g 0.28 across 31 trials. Atlas grade A.', ev: 'caffeine:A:acute', src: ['Caffeine', 'ing:caffeine'], who: 'Healthy young adults' },
+      { l: 'One bout of exercise', s: 'overall cognitive performance', segs: one(0.10), lab: '0.10', cls: 'boost', tip: 'g 0.10 across 79 studies; larger for some tasks and intensities. Chang et al. 2012. Not graded here.', src: ['Chang et al. 2012', 'pm:22480735'], who: 'Mixed adults' },
+      { l: 'Multivitamin over 60, 2–3 years', s: 'global cognition', segs: one(0.07), lab: '0.07', cls: 'boost', tip: '0.07 SD pooled across the COSMOS trials. Atlas grade B.', ev: 'multivitamin-mineral-supplements:B:chronic', src: ['Multivitamin', 'ing:multivitamin-mineral-supplements'], who: 'Adults over 60' },
+    ];
+    rows.forEach(r => { if (r.segs) r.segs.forEach(s => { s.cls = r.cls; }); });
+    return barFig({ id: 'fig-brakes', title: 'Why remove first: brakes cost more than boosters give', sub: 'Effect size (Hedges’ g or SMD) from meta-analyses and trials. A longer bar is a bigger effect.',
+      legend: [['cost', 'Brake: the cost of the problem'], ['boost', 'Booster: the gain']], rows, max: 1.4,
+      ticks: [[0, '0'], [0.2, '0.2 small'], [0.5, '0.5 medium'], [0.8, '0.8 large']],
+      note: 'The studies measured different things, so compare the bars roughly, not exactly. The one big booster, caffeine on a sleep-deprived brain, is itself a brake being released: on a rested brain the same caffeine gives about a quarter of that.',
+      table: { head: ['Item', 'Outcome', 'Effect size', 'Who was studied', 'Source'], cells: r => [r.l, r.s, r.lab, r.who, ''] } });
+  }
+  // when each pill ingredient works, and how long caffeine can cost sleep
+  function timingFigure() {
+    const rows = [
+      { l: 'Caffeine', s: 'alertness, attention, reaction time', segs: [{ a: 0.5, b: 3, cls: 'boost' }, { a: 3, b: 4, cls: 'boost fade' }], lab: '0.5–4 h', tip: 'Take 30–60 minutes before the task; peaks within about an hour and runs 3–4 hours.', src: ['Caffeine', 'ing:caffeine'] },
+      { l: 'Caffeine: sleep cost', s: 'if it is still in you at bedtime', segs: [{ a: 0, b: 9, cls: 'cost lite' }, { a: 9, b: 13, cls: 'cost lite fade' }], lab: 'up to 9–13 h', tip: 'Caffeine taken 0–13 hours before bed cut total sleep by about 45 minutes in pooled trials (atlas grade A).', ev: 'caffeine:A:acute', src: ['Caffeine', 'ing:caffeine'] },
+      { l: 'L-theanine', s: 'smoother focus, with caffeine', segs: [{ a: 0.5, b: 2, cls: 'boost' }], lab: '≈0.5–2 h', tip: 'Peaks in the blood about 0.8 hours after a dose; effect window within about 2 hours.', src: ['L-theanine', 'ing:l-theanine'] },
+      { l: 'American ginseng', s: 'working memory', segs: [{ a: 1, b: 3, cls: 'boost' }], lab: '1–3 h', tip: 'Benefit measured 1 to about 3 hours after a single dose.', src: ['American ginseng', 'ing:american-ginseng-cereboost'] },
+      { l: 'Creatine, big dose', s: 'sleep-deprived only', segs: [{ a: 1.5, b: 3, cls: 'boost' }, { a: 3, b: 5, cls: 'boost fade' }], lab: 'from 1.5–3 h', tip: 'A single large dose taken 1.5–3 hours before testing; how long the effect lasts was not measured.', src: ['Creatine', 'ing:creatine'] },
+    ];
+    return barFig({ id: 'fig-timing', cls: 'timing', title: 'When it works, and what it costs', sub: 'Hours after taking it. Faded ends mark where the studies stop being precise.',
+      legend: [['boost', 'Works'], ['cost lite', 'Can cut sleep']], rows, max: 14, ticks: [0, 2, 4, 6, 8, 10, 12, 14].map(h => [h, h + ' h']),
+      note: 'The boost lasts a few hours; the sleep cost can last into the night. That is why the last dose should be about 9 hours before bed.',
+      table: { head: ['Ingredient', 'What', 'Window', 'Source'], cells: r => [r.l, r.s, r.lab, ''] } });
+  }
+  // how fast caffeine adds up against the EFSA single-dose and daily limits
+  function caffeineFigure() {
+    const rng = (lo, hi) => hi > lo ? [{ a: 0, b: lo, cls: 'boost' }, { a: lo, b: hi, cls: 'boost lite' }] : [{ a: 0, b: lo, cls: 'boost' }];
+    const rows = [
+      { l: 'Limitless Pill core', s: 'one capsule', segs: rng(75, 100), lab: '75–100 mg', src: ['Caffeine', 'ing:caffeine'] },
+      { l: 'Cup of tea', s: 'black or green', segs: rng(37.5, 75), lab: '≈40–75 mg', src: ['Tea', 'ing:tea-and-green-tea'] },
+      { l: 'Matcha', s: 'one 2.7 g serving', segs: rng(70, 70), lab: '≈70 mg', src: ['Tea and matcha', 'ing:tea-and-green-tea'] },
+      { l: 'Energy drink', s: '250 ml can', segs: rng(80, 80), lab: '80 mg', src: ['Energy drinks', 'ing:energy-drinks-and-stimulant-beverages'] },
+      { l: 'Coffee', s: 'one shop cup', segs: rng(58, 259), lab: '58–259 mg', src: ['Coffee', 'ing:coffee'] },
+      { l: 'Energy drink', s: 'large can', segs: rng(160, 300), lab: '160–300 mg', src: ['Energy drinks', 'ing:energy-drinks-and-stimulant-beverages'] },
+    ];
+    rows.forEach(r => { r.tip = `${r.l}, ${r.s}: ${r.lab} of caffeine.`; });
+    return barFig({ id: 'fig-caffeine', cls: 'caffeine', title: 'How fast caffeine adds up', sub: 'Caffeine per serving. Dark lines: the EU safety limits for healthy adults (EFSA), 200 mg at once and 400 mg in a day.',
+      legend: [['boost', 'Typical minimum'], ['boost lite', 'Up to']], rows, max: 450,
+      ticks: [[0, '0'], [100, '100'], [200, '200 mg', true], [300, '300'], [400, '400 mg', true]],
+      note: 'One shop coffee can hold more caffeine than the pill, and a large energy drink can pass the 200 mg single-dose limit on its own. Count every source toward 400 mg a day; pregnancy: 200 mg a day.',
+      table: { head: ['Source', 'Serving', 'Caffeine', 'Source'], cells: r => [r.l, r.s, r.lab, ''] } });
+  }
+
   function viewPill() {
     const stack = [
-      { id: 'caffeine', dose: '100–200 mg (roughly one strong cup of coffee), once', timing: 'Take 30–60 min before the task; effect peaks within about an hour and runs 3–4 h.',
+      { id: 'caffeine', best: 'Alertness, attention and reaction time', kpi: [['Effect', 'g 0.28', 'reaction time, rested'], ['Starts', '30–60 min', 'peaks within ~1 h'], ['Lasts', '3–4 h', 'sleep cost up to 9–13 h']], dose: '100–200 mg (roughly one strong cup of coffee), once', timing: 'Take 30–60 min before the task; effect peaks within about an hour and runs 3–4 h.',
         what: 'The single best-proven acute cognitive lever in the whole database. Reaction time improves within minutes (31-trial meta-analysis, g = 0.28, dose-dependent up to ~200 mg+), and sustained attention/vigilance accuracy improves (pooled g = 0.27). Benefits hold even in light or non-habitual users, not just caffeine-withdrawn ones.',
         rescue: 'Under sleep deprivation the effect is much larger, not smaller: 100–600 mg produced g = 0.86 (attention response time), g = 1.11 (reaction time) and restored psychomotor vigilance after 64 h awake comparably to modafinil 400 mg or d-amphetamine 20 mg.',
         catch_: 'Executive function gains are smaller and inconsistent (g = 0.35, mixed across specific tasks). Raises anxiety/jitteriness in low/non-consumers and reliably harms sleep if taken within about 9–13 h of bedtime — the "cost" of a stimulant stack is paid at night.' },
-      { id: 'l-theanine', dose: '100–200 mg, alongside the caffeine dose above', timing: 'Same time as caffeine; effect window similar (within ~2 h).',
+      { id: 'l-theanine', best: 'Smoother focus, with less jitter, alongside caffeine', kpi: [['Effect', '−18 ms', 'choice reaction time'], ['Starts', '≈0.5–1 h', 'blood peak at 0.8 h'], ['Lasts', '≈2 h', 'same window as caffeine']], dose: '100–200 mg, alongside the caffeine dose above', timing: 'Same time as caffeine; effect window similar (within ~2 h).',
         what: 'Speeds choice/recognition reaction time by ~15–20 ms alone. Its main value is pairing with caffeine: the combination improves alertness and attention-switching accuracy with less of the jitteriness caffeine causes alone — though the trial literature says caffeine dose explains most of the combined effect, and two trials found no extra benefit over caffeine alone.',
         rescue: null,
         catch_: 'Simple reaction time does not improve in pooled analyses. This is a smoothing agent for caffeine, not an independent enhancer at the available doses.' },
-      { id: 'creatine', dose: '0.2–0.35 g/kg (about 14–25 g for a 70 kg adult), single dose, 1.5–3 h before testing', timing: 'Take 1.5–3 h ahead — onset is slower than caffeine.',
+      { id: 'creatine', best: 'Thinking speed on a sleep-deprived brain only', kpi: [['Effect', 'up to 12%', 'less decline when sleep-deprived'], ['Starts', '1.5–3 h', 'after one large dose'], ['Lasts', 'not measured', '']], dose: '0.2–0.35 g/kg (about 14–25 g for a 70 kg adult), single dose, 1.5–3 h before testing', timing: 'Take 1.5–3 h ahead — onset is slower than caffeine.',
         what: 'The rescue ingredient for sleep-deprived cognition specifically: a single large dose improved processing speed on language, logic and numeric tasks plus PVT reaction speed during sleep deprivation, tracking measurable brain-energy changes (PCr/Pi, ATP, prevented cerebral pH drop).',
         rescue: 'This is its one acute use case — do not expect it to sharpen a rested, well-slept brain.',
         catch_: 'In rested healthy adults, acute single-dose creatine for working memory is graded D (insufficient evidence) — it does essentially nothing for a brain that is not short on sleep or energy. The acute dose (14–25 g) is well above Brain Food\'s proposed 5 g/day daily cap, so this is an occasional-use rescue dose, not a daily stack component.' },
-      { id: 'american-ginseng-cereboost', dose: '100–200 mg standardized extract (10.65% ginsenosides), single dose', timing: 'Take 1–3 h before the task — effect was measured at post-dose testing through about 3 h.',
+      { id: 'american-ginseng-cereboost', best: 'Working memory', kpi: [['Effect', 'all doses', 'improved spatial working memory'], ['Starts', '1–3 h', 'after one dose'], ['Lasts', '~3 h tested', 'not measured beyond']], dose: '100–200 mg standardized extract (10.65% ginsenosides), single dose', timing: 'Take 1–3 h before the task — effect was measured at post-dose testing through about 3 h.',
         what: 'The one botanical with real acute single-dose human trial evidence for working memory: all tested doses (100/200/400 mg) improved spatial working memory (Corsi block test); 200 mg improved a composite working-memory factor in knowledge workers specifically, with no change in mood or blood glucose.',
         rescue: null,
         catch_: 'Only two small industry-sponsored trials behind this; no long-term safety data exists, so the safety gate is conditional, not a clean pass.' },
@@ -646,11 +755,12 @@
     const card = (s, rank) => { const m = byId[s.id]; if (!m) return ''; const d = m._derived; return `<div class="stack-card">
       <div class="stack-rank">${rank}</div>
       <div class="stack-body">
-        <div class="rc-head" style="margin-bottom:.15rem"><div><h3 style="margin:0 0 .15rem">${monoLink(s.id)}</h3><p class="small mono" style="margin:0">${esc(s.dose)}</p></div>
+        <div class="rc-head" style="margin-bottom:.15rem"><div class="stack-t">${catAv(m)}<div><h3 style="margin:0 0 .15rem">${monoLink(s.id)}</h3><p class="small mono" style="margin:0">${esc(s.dose)}</p></div></div>
         <div style="display:flex;gap:.35rem;flex-wrap:wrap">${tf('acute')}${grade(d.best_grade_acute)}${gate(d.safety_gate)}</div></div>
-        <p class="small muted" style="margin:.3rem 0 .7rem">${esc(s.timing)}</p>
-        <p>${esc(s.what)}</p>${s.rescue ? `<p><strong>Sleep-deprivation rescue:</strong> ${esc(s.rescue)}</p>` : ''}
+        <p class="stack-best">${icon('target')}<span><b>Best for:</b> ${esc(s.best)}</span></p>
+        <div class="kpis">${s.kpi.map(([k, v, sub]) => `<div class="kpi"><span class="kpi-k">${esc(k)}</span><span class="kpi-v">${esc(v)}</span>${sub ? `<span class="kpi-s">${esc(sub)}</span>` : ''}</div>`).join('')}</div>
         ${catchBox(s.catch_, 'small')}
+        <details class="stack-more"><summary>The full evidence</summary><p class="small muted">${esc(s.timing)}</p><p>${esc(s.what)}</p>${s.rescue ? `<p><strong>Sleep-deprivation rescue:</strong> ${esc(s.rescue)}</p>` : ''}</details>
       </div></div>`; };
     const recipes = [
       { tfKey: 'acute', title: 'Double Matcha Focus Shot', subtitle: 'Ready in 5 minutes · effective window about 1–4 h after drinking',
@@ -705,7 +815,9 @@
     <div class="section" id="recipes"><h2>Three recipes, one per timeframe</h2><p class="small muted">Same evidence base as the rest of this page, turned into something you'd actually make: a drink for today, a short protocol for a demanding week, and a daily pattern for the years that actually move long-term cognitive outcomes. Grades and the honest catch are per recipe below.</p>
       <div class="recipe-grid">${recipes.map(recipeCard).join('')}</div></div>
     <div class="section" id="stack-section"><h2>The acute stack, in order of evidence strength</h2><p class="small muted">Grade shown is the best acute grade on file for that ingredient; gate is the safety-review outcome. Full dosing, interaction and safety detail is on each ingredient's own page — this page is a summary, not a replacement for it.</p>
-      <div class="stack-grid">${stack.map((s, i) => card(s, i + 1)).join('')}</div></div>
+      ${timingFigure()}
+      <div class="stack-grid">${stack.map((s, i) => card(s, i + 1)).join('')}</div>
+      ${caffeineFigure()}</div>
     <div class="section"><h2>Why not more ingredients?</h2><div class="prose"><p>Only ingredients with acute (same-day, single-dose) grade A or B human evidence for an actual cognitive-performance domain — not a biomarker or blood-flow surrogate — qualify for the stack above. 22 acute evidence rows across 11 ingredients met grade A/B with a benefit direction; most collapse into caffeine itself once the overlap is removed. The ones that didn't make the cut, and why:</p></div>
       <div class="exclusion-grid">${notStack.map(n => `<div class="exclusion-card"><div class="ex-head">${ICON.x}${monoLink(n.id)}</div><p>${esc(n.why)}</p></div>`).join('')}</div></div>
     <div class="section prose"><h2>What this stack will not do</h2><ul class="boundary-list">${boundaries.map(b => `<li>${ICON.dot}<span>${b}</span></li>`).join('')}</ul></div>
@@ -854,7 +966,7 @@
       </div>
     </header>
 
-    <div class="callout info px-why-first"><strong>Why remove first?</strong> Most of what a brain booster seems to do is release a brake. In this atlas, caffeine’s effect on reaction time is about four times larger in sleep-deprived people (g = 1.11) than in rested people (g = 0.28). On a rested, well-fed brain, every booster here adds a small edge, not a new brain.</div>
+    ${brakesFigure()}
 
     <section class="px-check" aria-labelledby="px-check-h">
       <div class="px-check-head"><span class="px-n">0</span><div><h2 id="px-check-h">Find your brakes</h2><p>Tick what is true for you. Each tick points to its fix.</p></div></div>
@@ -1164,7 +1276,7 @@
     const rank = (a, b) => GR[b.grade] - GR[a.grade] || (general.has(b.population) - general.has(a.population)) || b._m._derived.composite_score - a._m._derived.composite_score;
     const pick = (doms, long) => bestPer(ROWS.filter(r => doms.includes(r.domain) && ['benefit', 'possible_benefit'].includes(r.direction) && 'ABC'.includes(r.grade) && r.grade && (long ? r.timeframe === 'chronic' : r.timeframe !== 'chronic') && inPop(r))).sort(rank).slice(0, 8);
     const nulls = doms => bestPer(ROWS.filter(r => doms.includes(r.domain) && r.direction === 'no_benefit' && 'AB'.includes(r.grade) && r.grade && inPop(r))).sort(rank);
-    const item = r => `<li class="gl-item"><div class="gl-top">${monoLink(r._m.id)}<span class="gl-badges">${grade(r.grade)}${tf(r.timeframe)}</span></div>
+    const item = r => `<li class="gl-item"><div class="gl-top"><span class="gl-name">${catAv(r._m, 'sm')}${monoLink(r._m.id)}</span><span class="gl-badges">${grade(r.grade)}${tf(r.timeframe)}</span></div>
       <div class="gl-pop${general.has(r.population) ? '' : ' only'}">${general.has(r.population) ? '' : 'only shown in · '}${esc(lab(POP_LABEL, r.population))}</div>
       ${r.dose_or_intake ? `<div class="gl-dose">${esc(clean(r.dose_or_intake))}</div>` : ''}
       <p class="gl-eff">${esc(clean(r.effect_summary))}</p></li>`;
@@ -1226,6 +1338,38 @@
     if (b) return { cls: 'weak', a: 'Maybe', d: 'Limited evidence only: ' + where(b) };
     return { cls: 'weak', a: 'Unclear', d: 'Studied, but the results are weak, mixed or preliminary.' };
   }
+  // the three answers as one scannable strip of icons (lists); the words stay in the tooltip and for screen readers
+  const VT_SHORT = ['Focus', 'Memory', 'Long-run'];
+  function vTrio(m) {
+    return `<span class="vtrio">${QA_GOALS.map(([q, , doms, onlyTf], i) => { const x = quickAnswer(m, doms, onlyTf); return `<span class="vt" title="${esc(q)}: ${esc(x.a)}">${vIcon(x.a)}<span>${VT_SHORT[i]}</span><span class="sr">: ${esc(x.a)}</span></span>`; }).join('')}</span>`;
+  }
+
+  // evidence map: what was measured (rows) x how long it was taken (columns); letter = strength, arrow = direction
+  const MAP_GROUPS = [
+    ['Focus & alertness', ['alertness', 'sustained_attention', 'vigilance', 'reaction_time', 'processing_speed', 'cognitive_fatigue', 'resistance_to_decline']],
+    ['Memory & learning', ['working_memory', 'episodic_memory', 'learning', 'learning_retention']],
+    ['Thinking & ageing', ['executive_function', 'global_cognition', 'cognitive_aging', 'cognitive_decline', 'dementia_risk']],
+    ['Not a thinking test', ['sleep_related_cognition', 'mood_stress', 'vascular_health', 'cerebral_blood_flow', 'neuroplasticity_biomarkers', 'other']],
+  ];
+  const DIR_KIND = { benefit: ['up', 'Benefit'], possible_benefit: ['up', 'Possible benefit'], no_benefit: ['flat', 'No effect'], inconsistent: ['wave', 'Mixed'], insufficient: ['wave', 'Too little evidence'], harm: ['down', 'Negative effect'] };
+  const MAP_TF = ['acute', 'short_term_days', 'chronic'];
+  function evidenceMap(m) {
+    const rows = (m.evidence_by_outcome || []).map((r, i) => Object.assign({ _i: i }, r)).filter(r => GR[r.grade]);
+    if (!rows.length) return '<p class="muted">No graded findings yet.</p>';
+    const cell = (dom, t) => {
+      const hit = rows.filter(r => r.domain === dom && r.timeframe === t).sort((x, y) => GR[y.grade] - GR[x.grade] || GENERAL.has(y.population) - GENERAL.has(x.population));
+      if (!hit.length) return '<span class="em-cell em-empty" aria-label="not studied">·</span>';
+      const r = hit[0], k = DIR_KIND[r.direction] || DIR_KIND.inconsistent;
+      const tip = `${lab(DOMAIN_LABEL, dom)} · ${TF_SHORT[t]} · grade ${r.grade} (${GRADE_WORD[r.grade]}) · ${k[1]} · ${lab(POP_LABEL, r.population)}. ${String(r.effect_summary || '').replace(/\[[^\]]*\]/g, '').slice(0, 170)}${hit.length > 1 ? ` (+${hit.length - 1} more finding${hit.length > 2 ? 's' : ''})` : ''}`;
+      return `<button type="button" class="em-cell em-${k[0]}" data-tip="${esc(tip)}" data-emrow="${r._i}" aria-label="${esc(tip)}">${icon(k[0])}${grade(r.grade)}${hit.length > 1 ? `<small>+${hit.length - 1}</small>` : ''}</button>`;
+    };
+    const body = MAP_GROUPS.map(([g, doms]) => {
+      const ds = doms.filter(d => rows.some(r => r.domain === d));
+      return ds.length ? `<div class="em-g">${esc(g)}</div>` + ds.map(d => `<div class="em-d">${esc(lab(DOMAIN_LABEL, d))}</div>${MAP_TF.map(t => cell(d, t)).join('')}`).join('') : '';
+    }).join('');
+    return `<div class="emap" role="group" aria-label="Evidence map"><div class="em-h"></div>${MAP_TF.map(t => `<div class="em-h">${tf(t)}</div>`).join('')}${body}</div>
+      <div class="em-key">${['up', 'flat', 'wave', 'down'].map(k => `<span class="em-k em-${k}">${icon(k)}${{ up: 'Benefit', flat: 'No effect', wave: 'Mixed', down: 'Negative' }[k]}</span>`).join('')}<span class="em-k">${grade('A')}…${grade('E')} strength of evidence</span><span class="em-k">${'·'} not studied</span></div>`;
+  }
   const ist = { id: null, tab: 'overview' };
   function viewIngredient(id) {
     const m = byId[id];
@@ -1234,7 +1378,7 @@
     const d = m._derived, s = m.safety || {}, r = m.regulatory || {}, f = m.formulation || {}, sc = m.scores || {};
     const studies = m.studies || [];
     const sid = x => `<a href="#" class="ref" data-ref="${esc(x)}">${esc(x)}</a>`;
-    const rowsT = (m.evidence_by_outcome || []).length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Timeframe</th><th>Domain</th><th>Population</th><th>Dose / intake</th><th>Duration</th><th>Grade</th><th>Direction</th><th>Effect</th><th>Certainty (GRADE reasoning)</th><th>Key studies</th></tr></thead><tbody>${m.evidence_by_outcome.map(x => `<tr><td class="tight">${tf(x.timeframe)}</td><td>${esc(lab(DOMAIN_LABEL, x.domain))}</td><td class="wrap">${esc(lab(POP_LABEL, x.population))}<br><small>${esc(x.population_detail)}</small></td><td class="wrap">${esc(x.dose_or_intake)}</td><td>${esc(x.duration)}</td><td>${grade(x.grade)}</td><td>${dir(x.direction)}</td><td class="wrap">${inline(x.effect_summary)}<br><small class="mono">${esc(x.effect_estimate)}</small></td><td class="wrap">${inline(x.certainty_notes)}</td><td>${(x.key_study_ids || []).map(sid).join(', ')}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">No outcome rows.</p>';
+    const rowsT = (m.evidence_by_outcome || []).length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Timeframe</th><th>Domain</th><th>Population</th><th>Dose / intake</th><th>Duration</th><th>Grade</th><th>Direction</th><th>Effect</th><th>Certainty (GRADE reasoning)</th><th>Key studies</th></tr></thead><tbody>${m.evidence_by_outcome.map((x, i) => `<tr id="ev-row-${i}"><td class="tight">${tf(x.timeframe)}</td><td>${esc(lab(DOMAIN_LABEL, x.domain))}</td><td class="wrap">${esc(lab(POP_LABEL, x.population))}<br><small>${esc(x.population_detail)}</small></td><td class="wrap">${esc(x.dose_or_intake)}</td><td>${esc(x.duration)}</td><td>${grade(x.grade)}</td><td>${dir(x.direction)}</td><td class="wrap">${inline(x.effect_summary)}<br><small class="mono">${esc(x.effect_estimate)}</small></td><td class="wrap">${inline(x.certainty_notes)}</td><td>${(x.key_study_ids || []).map(sid).join(', ')}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">No outcome rows.</p>';
     const acuteT = (m.acute_matrix || []).length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Dose</th><th>Onset</th><th>Duration studied</th><th>Domain</th><th>Population</th><th>Effect estimate</th><th>Certainty</th><th>Safety</th><th>Studies</th></tr></thead><tbody>${m.acute_matrix.map(x => `<tr><td class="wrap">${esc(x.dose)}</td><td>${esc(x.onset)}</td><td>${esc(x.duration_studied)}</td><td>${esc(lab(DOMAIN_LABEL, x.domain) || x.domain)}</td><td class="wrap">${esc(x.population)}</td><td class="wrap">${inline(x.effect_estimate)}</td><td class="wrap">${inline(x.certainty)}</td><td class="wrap">${inline(x.safety)}</td><td>${(x.study_ids || []).map(sid).join(', ')}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">No same-day rows: not studied acutely, or not applicable.</p>';
     const ltT = (m.longterm_matrix || []).length ? `<div class="tbl-wrap"><table class="tbl"><thead><tr><th>Duration</th><th>Population</th><th>Outcome</th><th>Effect estimate</th><th>Evidence quality</th><th>Limitations</th><th>Studies</th></tr></thead><tbody>${m.longterm_matrix.map(x => `<tr><td>${esc(x.duration)}</td><td class="wrap">${esc(x.population)}</td><td class="wrap">${esc(x.outcome)}</td><td class="wrap">${inline(x.effect_estimate)}</td><td class="wrap">${inline(x.evidence_quality)}</td><td class="wrap">${inline(x.limitations)}</td><td>${(x.study_ids || []).map(sid).join(', ')}</td></tr>`).join('')}</tbody></table></div>` : '<p class="muted">No long-term rows.</p>';
     const path = (m.mechanism && m.mechanism.pathway_map || []).map((p, i) => `<div class="step"><div class="i">${i + 1}</div><div><strong>${esc(p.step)}</strong><br><span class="small">${inline(p.detail)}</span></div><div class="badge neutral ev-${esc(p.evidence_level)}">${esc(lab(EV_LABEL, p.evidence_level))}</div></div>`).join('');
@@ -1266,8 +1410,11 @@
     const pane = (k, body) => `<section class="tabpane" data-tab="${k}" id="pane-${k}" role="tabpanel" aria-labelledby="tab-${k}"${ist.tab === k ? '' : ' hidden'}>${body}</section>`;
     return `<div class="ing-page">
     <nav class="crumbs" aria-label="Breadcrumb"><a href="#database">Ingredients</a>${icon('chev')}<span>${esc(m.category)} · ${esc(m.category_name)}</span></nav>
-    <div class="ing-hero"><div><h1>${esc(m.name)}</h1><p class="verdict">${esc(m.one_line_verdict)}</p></div>
+    <div class="ing-hero"><div><div class="ing-title">${catAv(m, 'lg')}<h1>${esc(m.name)}</h1></div><p class="verdict">${esc(m.one_line_verdict)}</p></div>
       <div class="ing-actions"><a class="btn" href="#compare.${esc(cmpIds.join(','))}">${icon('columns')}Compare</a><button type="button" class="btn ghost" data-open="help">${icon('help')}Reading guide</button></div></div>
+    <section class="qa" aria-labelledby="qa-t"><div class="qa-h"><h2 id="qa-t">Does it actually help?</h2><p>Human studies only. Biomarkers and mood never count.</p></div>
+      ${QA_GOALS.map(([q, sub, doms, onlyTf]) => { const x = quickAnswer(m, doms, onlyTf); return `<div class="qa-row"><div class="qa-q">${esc(q)}<small class="muted">${esc(sub)}</small></div><div class="qa-a ${(VERDICT[x.a] || VERDICT.Unclear)[1]}">${vIcon(x.a)}${esc(x.a)}</div><div class="qa-d">${x.d}</div></div>`; }).join('')}
+    </section>
     <div class="glance">
       ${gTile('zap', 'Same day', d.best_grade_acute, ba, 'No same-day benefit graded')}
       ${gTile('hourglass', 'Long-term', d.best_grade_chronic, bl, 'No long-term benefit graded')}
@@ -1275,12 +1422,10 @@
       ${tile('scale', 'Legal status', gate(d.regulatory_gate), esc(GATE_WORD[d.regulatory_gate] || ''))}
     </div>
     <div class="ing-status"><span>${icon('check')}${d.n_verified} of ${d.n_studies} studies verified against PubMed or Crossref</span><span>Overall score <strong class="mono">${d.composite_score.toFixed(1)}</strong>/10</span>${d.review_status === 'reviewed' ? '<span class="badge pass">Independently reviewed</span>' : '<span><span class="badge conditional">Draft</span> independent review pending</span>'}</div>
-    <section class="qa" aria-labelledby="qa-t"><div class="qa-h"><h2 id="qa-t">Does it actually help?</h2><p>Human studies only. Biomarkers and mood never count.</p></div>
-      ${QA_GOALS.map(([q, sub, doms, onlyTf]) => { const x = quickAnswer(m, doms, onlyTf); return `<div class="qa-row"><div class="qa-q">${esc(q)}<small class="muted">${esc(sub)}</small></div><div class="qa-a ${x.cls}"><span class="dot"></span>${esc(x.a)}</div><div class="qa-d">${x.d}</div></div>`; }).join('')}
-    </section>
     <div id="itabs-anchor" class="itabs-anchor"></div>
     <div class="itabs" role="tablist" aria-label="Ingredient sections">${TABS.map(([k, l, n]) => `<button type="button" role="tab" id="tab-${k}" data-itab="${k}" aria-controls="pane-${k}" aria-selected="${ist.tab === k}" tabindex="${ist.tab === k ? 0 : -1}">${esc(l)}${n ? `<span class="n">${n}</span>` : ''}</button>`).join('')}</div>
     ${pane('overview', `
+      <figure class="section fig" id="emap"><figcaption class="fig-h"><b>Evidence map</b><span>Every graded finding at a glance: what was measured, how long it was taken, which way it went and how strong the evidence is. Hover or tap a cell for the detail; click it to open the finding.</span></figcaption>${evidenceMap(m)}</figure>
       ${d.review_status !== 'reviewed' ? '<div class="callout">Draft. Written and self-audited by the research agent, and every cited study was matched to its PubMed or Crossref record. The independent second review (citation audit, null-trial hunt, grade check) has not run yet.</div>' : ''}
       <div class="section prose" id="conclusion"><h2>Scientific conclusion</h2>${md(m.scientific_conclusion)}</div>
       <div class="section prose" id="deficiency"><h2>Fixing a deficiency vs boosting a healthy brain</h2>${md(m.deficiency_vs_enhancement)}</div>
@@ -1600,7 +1745,7 @@
   const ALL_PAGES = PRIMARY.map(([k, l, , ic, d]) => ({ k, t: l, d, ic })).concat([{ k: 'library', t: 'Library', d: `All ${LIB_COUNT} research pages, on four shelves.`, ic: 'grid' }], LIB.flatMap(g => g.items.map(([k, l, d, ic]) => ({ k, t: l, d, ic }))));
   function palResults(q) {
     const s = q.trim().toLowerCase();
-    const ingItem = m => ({ href: '#ingredient.' + m.id, t: m.name, s: m.category_name, ic: 'leaf', m });
+    const ingItem = m => ({ href: '#ingredient.' + m.id, t: m.name, s: m.category_name, ic: CAT_IC[m.category] || 'leaf', m });
     const pageItem = p => ({ href: '#' + p.k, t: p.t, s: p.d, ic: p.ic });
     if (!s) return [['Go to', ALL_PAGES.slice(0, PRIMARY.length).map(pageItem)], ['Popular ingredients', ['caffeine', 'creatine', 'l-theanine', 'omega-3-dha-epa', 'bacopa-monnieri'].filter(id => byId[id]).map(id => ingItem(byId[id]))]];
     const words = s.split(/\s+/).filter(Boolean);
@@ -1650,6 +1795,7 @@
         <div class="legend-block"><h3><span class="n">1</span>How strong is the evidence?</h3><div class="legend-rows">${['A', 'B', 'C', 'D', 'E'].map(g => row(grade(g), `<b>${GRADE_WORD[g]}</b>: ${GRADE_HELP[g]}`)).join('')}${row(grade(null), '<b>No grade</b>: not studied for this. Unknown, which is not the same as “no effect”.')}</div></div>
         <div class="legend-block"><h3><span class="n">2</span>When does it work?</h3><div class="legend-rows">${row(tf('acute'), 'A single dose, tested the same day.')}${row(tf('short_term_days'), '2 to 13 days of use.')}${row(tf('chronic'), '2 weeks or longer of regular use.')}</div></div>
         <div class="legend-block"><h3><span class="n">3</span>Is it safe and allowed?</h3><div class="legend-rows">${row(gate('pass'), 'No safety or legal barrier found.')}${row(gate('conditional'), 'Usable only within the limits on its page: dose, who should avoid it, allowed wording.')}${row(gate('fail'), 'Excluded: fails a hard safety or legal requirement.')}</div></div>
+        <div class="legend-block"><h3><span class="n">4</span>The plain answers</h3><div class="legend-rows">${[['Yes', 'Good evidence of a benefit in healthy adults.'], ['In some groups', 'Good evidence, but only in a narrower group (for example older adults or the sleep-deprived).'], ['Maybe', 'Only limited evidence of a benefit.'], ['Unclear', 'Studied, but the results are weak or mixed.'], ['No', 'Good trials found no benefit.'], ['No, may harm', 'Good trials found a negative effect.'], ['Not studied', 'No human study measured it.']].map(([a, t]) => row(`<span class="qa-a">${vIcon(a)}</span>`, `<b>${a}</b>: ${t}`)).join('')}</div></div>
         <div class="legend-note"><strong>One rule to remember:</strong> a grade belongs to one outcome, in one group of people, over one timeframe. Caffeine is grade A for same-day alertness and has no long-term grade at all. Feeling alert is not remembering more, and a better blood marker is not a better brain.</div>
         <div class="legend-block"><h3>Shortcuts</h3><div class="legend-rows">${row('<kbd>/</kbd> or <kbd>Ctrl K</kbd>', 'Search anything')}${row('<kbd>?</kbd>', 'Open this guide')}${row('<kbd>Esc</kbd>', 'Close a panel')}</div></div>
       </div>
@@ -1697,6 +1843,7 @@
   function render() {
     const { view, param } = route();
     const app = document.getElementById('app');
+    hideTip();
     // keep focus (and caret) in a filter box across re-renders
     const ae = document.activeElement, keepId = ae && ae.id && app.contains && app.contains(ae) ? ae.id : null;
     const caret = keepId && typeof ae.selectionStart === 'number' ? ae.selectionStart : null;
@@ -1735,6 +1882,12 @@
       if (anc && anc.getBoundingClientRect) { const top = anc.getBoundingClientRect().top + window.scrollY - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--topbar-h')) || 0) - 6; if (window.scrollY > top) window.scrollTo({ top, behavior: 'smooth' }); }
     }));
     { const tl = app.querySelector('.itabs'); if (tl && tl.addEventListener && view === 'ingredient') tl.addEventListener('keydown', e => { if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return; const bs = Array.from(tl.querySelectorAll('[data-itab]')); const i = bs.findIndex(b => b.dataset.itab === ist.tab); const nb = bs[(i + (e.key === 'ArrowRight' ? 1 : bs.length - 1)) % bs.length]; setITab(app, nb.dataset.itab); nb.focus(); }); }
+    // evidence map: a cell opens its finding in the Evidence tab
+    app.querySelectorAll('[data-emrow]').forEach(b => b.addEventListener('click', () => {
+      setITab(app, 'evidence');
+      const tr = document.getElementById('ev-row-' + b.dataset.emrow);
+      if (tr) { tr.scrollIntoView({ behavior: 'smooth', block: 'center' }); tr.classList.add('row-flash'); setTimeout(() => tr.classList.remove('row-flash'), 2000); }
+    }));
     // protocol: timeframe tabs, brake check, jump from a brake to its fix
     app.querySelectorAll('[data-ptab]').forEach(b => b.addEventListener('click', () => setPxTab(app, b.dataset.ptab)));
     { const tl = document.getElementById('px-tabs'); if (tl && tl.addEventListener && view === 'protocol') tl.addEventListener('keydown', e => { if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return; const nt = pxs.tab === 'short' ? 'long' : 'short'; setPxTab(app, nt); const b = document.getElementById('px-tab-' + nt); if (b) b.focus(); }); }
@@ -1776,6 +1929,24 @@
       else if (e.key === '?') { e.preventDefault(); openOverlay('help'); }
     }
   });
+  // one shared tooltip for figures: hover or keyboard focus (or a tap) shows it; plain text only, never HTML
+  let tipEl = null;
+  function showTip(t) {
+    const s = t.dataset.tip;
+    if (!s) { hideTip(); return; }
+    if (!tipEl) { tipEl = document.createElement('div'); tipEl.className = 'tip'; tipEl.setAttribute('role', 'tooltip'); document.body.appendChild(tipEl); }
+    tipEl.textContent = s; tipEl.hidden = false;
+    const r = t.getBoundingClientRect(), w = tipEl.offsetWidth, h = tipEl.offsetHeight;
+    const x = Math.max(8, Math.min(innerWidth - w - 8, r.left + r.width / 2 - w / 2));
+    const y = r.top - h - 8 < 8 ? r.bottom + 8 : r.top - h - 8;
+    tipEl.style.left = x + 'px'; tipEl.style.top = y + 'px';
+  }
+  function hideTip() { if (tipEl) tipEl.hidden = true; }
+  const tipTarget = e => e.target && e.target.closest ? e.target.closest('[data-tip]') : null;
+  document.addEventListener('pointerover', e => { const t = tipTarget(e); if (t) showTip(t); else hideTip(); });
+  document.addEventListener('focusin', e => { const t = tipTarget(e); if (t) showTip(t); else hideTip(); });
+  document.addEventListener('focusout', hideTip);
+  window.addEventListener('scroll', hideTip, { passive: true });
   window.addEventListener('hashchange', () => { const h = (location.hash || '#home').slice(1) || 'home'; if (h !== CURRENT) { if (OVL) closeOverlay(true); CURRENT = h; window.__tblKeepScroll = false; _render(); } });
   document.addEventListener('click', e => {
     const t = e.target && e.target.closest ? e.target : null;
