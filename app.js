@@ -4,8 +4,9 @@
   const D = window.BF_DATA || {};
   const META = D.meta || { counts: {}, grade_distribution: {}, categories: {} };
   const MONOS = (D.monographs || []).slice();
-  const SYN = D.syntheses || {};
-  const BIB = D.bibliography || [];
+  // syntheses, bibliography and study details may arrive after first paint (see "background data"); these objects fill in place
+  const SYN = Object.assign({}, D.syntheses || {});
+  const BIB = (D.bibliography || []).slice();
   const GR = { A: 5, B: 4, C: 3, D: 2, E: 1 };
   const GRADE_LABEL = { A: 'Strong human evidence', B: 'Moderate human evidence', C: 'Limited human evidence', D: 'Preliminary (mechanistic/animal/exploratory)', E: 'Not supported or concerning' };
   const DOMAIN_LABEL = { alertness: 'Alertness', sustained_attention: 'Sustained attention', reaction_time: 'Reaction time', working_memory: 'Working memory', executive_function: 'Executive function', processing_speed: 'Processing speed', vigilance: 'Vigilance', cognitive_fatigue: 'Cognitive fatigue', learning: 'Learning', resistance_to_decline: 'Resistance to performance decline', episodic_memory: 'Episodic memory', learning_retention: 'Learning retention', global_cognition: 'Global cognition', cognitive_aging: 'Cognitive aging', vascular_health: 'Brain vascular health', cognitive_decline: 'Cognitive decline', dementia_risk: 'Dementia risk', neuroplasticity_biomarkers: 'Neuroplasticity biomarkers', sleep_related_cognition: 'Sleep-related cognition', mood_stress: 'Mood / stress', cerebral_blood_flow: 'Cerebral blood flow', other: 'Other' };
@@ -110,6 +111,8 @@
     flat: '<path d="M5 12h14"/>',
     wave: '<path d="M3 12c2-3 4-3 6 0s4 3 6 0 4-3 6 0"/>',
     clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
+    share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/>',
+    plus: '<path d="M12 5v14M5 12h14"/>',
   };
   const icon = (k, cls) => `<svg class="ic${cls ? ' ' + cls : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k] || ''}</svg>`;
   // every ingredient wears its category's icon, so lists can be scanned by shape
@@ -118,7 +121,13 @@
   // plain answers ("does it help?") always travel with an icon, never colour alone
   const VERDICT = { 'Yes': ['checkc', 'v-yes'], 'In some groups': ['users', 'v-some'], 'Maybe': ['halfc', 'v-maybe'], 'Unclear': ['tildec', 'v-unclear'], 'No': ['xcircle', 'v-no'], 'No, may harm': ['alert', 'v-harm'], 'Not studied': ['minusc', 'v-none'] };
   const vIcon = a => { const v = VERDICT[a] || VERDICT.Unclear; return `<span class="vi ${v[1]}">${icon(v[0])}</span>`; };
-  const BRAND_SVG ='<svg class="brand-mark" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="104" fill="#124e66"/><rect x="106" y="135" width="300" height="62" rx="31" fill="#9fe0c8"/><rect x="106" y="231" width="226" height="62" rx="31" fill="#fff"/><rect x="106" y="327" width="152" height="62" rx="31" fill="#fff"/></svg>';
+  const store = { get: (k, d) => { try { return JSON.parse(localStorage.getItem(k) || 'null') || d; } catch (e) { return d; } }, set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) { /* storage blocked */ } } };
+  const TRAY = store.get('bf-compare', []).filter(id => byId[id]).slice(0, 4);
+  const RECENT = store.get('bf-recent', []).filter(id => byId[id]).slice(0, 8);
+  function noteRecent(id) { const i = RECENT.indexOf(id); if (i === 0) return; if (i > 0) RECENT.splice(i, 1); RECENT.unshift(id); RECENT.length = Math.min(RECENT.length, 8); store.set('bf-recent', RECENT); }
+  const cmpTog = (m, full) => { const on = TRAY.includes(m.id); return `<button type="button" class="cmp-tog${full ? ' btn' : ''}" data-cmptog="${esc(m.id)}" aria-pressed="${on}" title="${on ? 'Remove from' : 'Add to'} compare">${icon(on ? 'check' : 'plus')}${full ? `<span>${on ? 'In compare' : 'Add to compare'}</span>` : `<span class="sr">Compare ${esc(m.name)}</span>`}</button>`; };
+  const shareBtn = () => `<button type="button" class="btn ghost" data-share>${icon('share')}Share</button>`;
+  const BRAND_SVG = '<svg class="brand-mark" viewBox="0 0 512 512" aria-hidden="true"><rect width="512" height="512" rx="104" fill="#124e66"/><rect x="106" y="135" width="300" height="62" rx="31" fill="#9fe0c8"/><rect x="106" y="231" width="226" height="62" rx="31" fill="#fff"/><rect x="106" y="327" width="152" height="62" rx="31" fill="#fff"/></svg>';
 
   // ---------- site map: five everyday destinations + a four-shelf research library ----------
   // [route, label, short label (phone tab bar), icon, one-line description]
@@ -153,7 +162,7 @@
       ['summary', 'Executive summary', 'The main conclusions, the big uncertainties and the safety findings.', 'file'],
       ['decisions', 'Decision framework', 'Ten questions to answer before building the company.', 'compass'],
       ['methodology', 'Methodology', 'How the evidence was searched, graded and verified.', 'flask'],
-      ['bibliography', 'Bibliography', `All ${BIB.length} references, with their verification status.`, 'bookopen'],
+      ['bibliography', 'Bibliography', `All ${(META.counts || {}).unique_references || ''} references, with their verification status.`, 'bookopen'],
     ] },
     { key: 'business', t: 'Brain Food business', ic: 'briefcase', d: 'Products, market, costs and testing for the company.', items: [
       ['products', 'Product concepts', 'Five product families built only from eligible ingredients.', 'package'],
@@ -263,7 +272,7 @@
   // ---------- table engine (sort + filter) ----------
   function dataTable(spec) {
     // spec: {id, columns:[{key,label,sort:(row)=>val,render:(row)=>html,cls}], rows, filters:[{key,label,options:[[val,label]],match:(row,val)=>bool}], search:(row,q)=>bool, pageSize}
-    const st = (window.__tbl = window.__tbl || {})[spec.id] = (window.__tbl || {})[spec.id] || { sort: spec.defaultSort || null, dir: spec.defaultDir || 'desc', f: {}, q: '', limit: spec.pageSize || 200 };
+    const st = (window.__tbl = window.__tbl || {})[spec.id] = (window.__tbl || {})[spec.id] || { sort: spec.defaultSort || null, dir: spec.defaultDir || 'desc', f: {}, q: '', limit: Math.min(spec.pageSize || 200, 40) };  // long tables open at 40 rows; "Show all" reveals the rest
     const col = st.sort ? spec.columns.find(c => c.key === st.sort) : null;
     let rows = spec.rows.slice();
     Object.keys(st.f).forEach(k => { const v = st.f[k]; if (v === '' || v == null) return; const f = spec.filters.find(x => x.key === k); if (f) rows = rows.filter(r => f.match(r, v)); });
@@ -275,9 +284,11 @@
     (spec.filters || []).forEach(f => { html += `<label>${esc(f.label)}<select id="${spec.id}-f-${f.key}" data-f="${f.key}"><option value="">All</option>${f.options.map(o => `<option value="${esc(o[0])}" ${String(st.f[f.key]) === String(o[0]) ? 'selected' : ''}>${esc(o[1])}</option>`).join('')}</select></label>`; });
     (window.__tblSpec = window.__tblSpec || {})[spec.id] = spec;
     st._rows = rows;
+    const clamp = spec.columns.some(c => c.cls === 'wrap');
+    if (clamp) html += `<label class="tbl-full"><input type="checkbox" data-full="${spec.id}"${st.full ? ' checked' : ''}>Full text</label>`;
     html += `<span class="spacer"></span><span class="small">${rows.length} rows${rows.length > shown.length ? ' (showing ' + shown.length + ')' : ''}</span><button type="button" class="btn" data-export="${spec.id}" title="Download the filtered rows as a spreadsheet file">Download CSV</button></div>`;
-    html += `<div class="tbl-wrap"><table class="tbl" id="${spec.id}"><thead><tr>${spec.columns.map(c => `<th class="${c.sort !== false ? 'sortable' : ''}" data-sort="${c.key}">${esc(c.label)}${st.sort === c.key ? `<span class="arrow">${st.dir === 'asc' ? '▲' : '▼'}</span>` : ''}</th>`).join('')}</tr></thead><tbody>`;
-    html += shown.map(r => '<tr>' + spec.columns.map(c => `<td class="${c.cls || ''}">${c.render ? c.render(r) : esc(r[c.key])}</td>`).join('') + '</tr>').join('');
+    html += `<div class="tbl-wrap"><table class="tbl${clamp ? ' clampable' : ''}${clamp && st.full ? ' full' : ''}" id="${spec.id}"><thead><tr>${spec.columns.map(c => `<th class="${c.sort !== false ? 'sortable' : ''}" data-sort="${c.key}">${esc(c.label)}${st.sort === c.key ? `<span class="arrow">${st.dir === 'asc' ? '▲' : '▼'}</span>` : ''}</th>`).join('')}</tr></thead><tbody>`;
+    html += shown.map(r => '<tr>' + spec.columns.map(c => { const v = c.render ? c.render(r) : esc(r[c.key]); return `<td class="${c.cls || ''}">${c.cls === 'wrap' ? `<div class="cell-clamp">${v}</div>` : v}</td>`; }).join('') + '</tr>').join('');
     html += `</tbody></table></div>`;
     if (rows.length > shown.length) html += `<p><button class="btn" data-more="${spec.id}">Show all ${rows.length}</button></p>`;
     return html;
@@ -290,6 +301,8 @@
       if (q) q.addEventListener('input', () => { st.q = q.value; clearTimeout(st._t); st._t = setTimeout(render, 180); });
     });
     root.querySelectorAll('table.tbl th.sortable').forEach(th => th.addEventListener('click', () => { const id = th.closest('table').id, st = window.__tbl[id]; if (!st) return; if (st.sort === th.dataset.sort) st.dir = st.dir === 'asc' ? 'desc' : 'asc'; else { st.sort = th.dataset.sort; st.dir = 'desc'; } render(); }));
+    root.querySelectorAll('input[data-full]').forEach(cb => cb.addEventListener('change', () => { window.__tbl[cb.dataset.full].full = cb.checked; render(); }));
+    root.querySelectorAll('table.tbl.clampable tbody tr').forEach(tr => tr.addEventListener('click', e => { if (e.target.closest('a, button, input, select, summary')) return; tr.classList.toggle('open'); }));
     root.querySelectorAll('button[data-more]').forEach(b => b.addEventListener('click', () => { window.__tbl[b.dataset.more].limit = 100000; render(); }));
     root.querySelectorAll('button[data-export]').forEach(b => b.addEventListener('click', () => exportCsv(b.dataset.export)));
   }
@@ -373,7 +386,7 @@
         <h1>What really works for your brain, <em>and what doesn’t.</em></h1>
         <p class="lead">Plain answers on foods, nutrients and supplements for focus, memory and long-run brain health, each graded from human studies and checked against PubMed or Crossref.</p>
         <button type="button" class="hero-search" data-open="palette">${icon('search')}<span>Search an ingredient or topic…</span><kbd>/</kbd></button>
-        <div class="hero-pop"><span>Popular:</span>${POP.map(([id, l]) => `<a href="#ingredient.${id}">${esc(l)}</a>`).join('')}</div>
+        <div class="hero-pop">${RECENT.length ? `<span>Recent:</span>${RECENT.slice(0, 5).map(id => `<a href="#ingredient.${esc(id)}">${esc(byId[id].name.replace(/ \(.*\)$/, ''))}</a>`).join('')}` : `<span>Popular:</span>${POP.map(([id, l]) => `<a href="#ingredient.${id}">${esc(l)}</a>`).join('')}`}</div>
       </div>
       <div class="hero-card">
         <div class="hc-n">${(c.outcome_rows || 0).toLocaleString('en-US')}</div><div class="hc-l">graded findings, by strength of evidence</div>
@@ -481,11 +494,11 @@
       ['long', 'Best long-term', (a, b) => sortGrade(b._derived.best_grade_chronic) - sortGrade(a._derived.best_grade_chronic)], ['score', 'Overall score', () => 0], ['az', 'A to Z', (a, b) => a.name.localeCompare(b.name)]];
     const so = SORTS.find(s => s[0] === dbs.sort) || SORTS[0];
     list.sort((a, b) => so[2](a, b) || (dbs.sort === 'az' ? 0 : b._derived.composite_score - a._derived.composite_score));
-    const row = m => `<a class="ing-row" href="#ingredient.${esc(m.id)}" data-n="${esc(m.name.toLowerCase())}" data-s="${esc([m.name, (m.aliases || []).join(' '), (m.food_sources || []).join(' '), m.category_name].join(' ').toLowerCase())}">
-      <span class="ing-main">${catAv(m)}<span class="ing-tx"><span class="ing-name">${esc(m.name)}<span class="ing-cat">${esc(m.category_name)}</span></span>${vTrio(m)}<span class="ing-verdict">${esc(m.one_line_verdict)}</span></span></span>
+    const row = m => `<div class="ing-row" data-n="${esc(m.name.toLowerCase())}" data-s="${esc([m.name, (m.aliases || []).join(' '), (m.food_sources || []).join(' '), m.category_name].join(' ').toLowerCase())}">
+      <span class="ing-main">${catAv(m)}<span class="ing-tx"><a class="ing-name ing-link" href="#ingredient.${esc(m.id)}">${esc(m.name)}<span class="ing-cat">${esc(m.category_name)}</span></a>${vTrio(m)}<span class="ing-verdict">${esc(m.one_line_verdict)}</span></span></span>
       <span class="ing-g"><span class="ing-gl">Today</span>${grade(m._derived.best_grade_acute)}</span>
       <span class="ing-g"><span class="ing-gl">Long-term</span>${grade(m._derived.best_grade_chronic)}</span>
-      <span class="ing-g"><span class="ing-gl">Safe &amp; legal</span>${gate(eligGate(m))}</span>${icon('chev')}</a>`;
+      <span class="ing-g"><span class="ing-gl">Safe &amp; legal</span>${gate(eligGate(m))}</span>${cmpTog(m)}</div>`;
     return head + `<div class="db-tools">
       <label class="db-search">${icon('search')}<span class="sr">Search ingredients</span><input type="search" id="db-q" value="${esc(dbs.q)}" placeholder="Search by name or food…" autocomplete="off"></label>
       <div class="db-row"><div class="chips" role="group" aria-label="Show only">${DBQ.map(([k, l, f]) => `<button type="button" class="chip" data-dbq="${k}" aria-pressed="${dbs.quick === k}">${esc(l)}<span class="n">${MONOS.filter(f).length}</span></button>`).join('')}</div></div>
@@ -493,7 +506,7 @@
         <label>Sort<select id="db-sort" class="field">${SORTS.map(([v, l]) => `<option value="${v}"${dbs.sort === v ? ' selected' : ''}>${esc(l)}</option>`).join('')}</select></label><span class="spacer"></span>${seg}</div>
     </div>
     <div class="db-meta"><span><strong id="db-n">${list.length}</strong> shown. A grade is the best found for a benefit in any group of people: open the ingredient to see who.</span>${nDraft ? `<span class="small"><span class="badge conditional">Draft</span> ${nDraft} of ${MONOS.length} not yet independently reviewed</span>` : ''}</div>
-    <div class="ing-list"><div class="ing-head" aria-hidden="true"><span>Ingredient</span><span>Today</span><span>Long-term</span><span>Safe &amp; legal</span><span></span></div>${list.map(row).join('')}</div>
+    <div class="ing-list"><div class="ing-head" aria-hidden="true"><span>Ingredient</span><span>Today</span><span>Long-term</span><span>Safe &amp; legal</span><span>Compare</span></div>${list.map(row).join('')}</div>
     <div class="db-empty" id="db-empty"${list.length ? ' hidden' : ''}><p>No ingredient matches.</p><button type="button" class="btn sm" data-dbclear>Clear search and filters</button></div>`;
   }
   function dbFilter(app) {
@@ -755,7 +768,7 @@
     const card = (s, rank) => { const m = byId[s.id]; if (!m) return ''; const d = m._derived; return `<div class="stack-card">
       <div class="stack-rank">${rank}</div>
       <div class="stack-body">
-        <div class="rc-head" style="margin-bottom:.15rem"><div class="stack-t">${catAv(m)}<div><h3 style="margin:0 0 .15rem">${monoLink(s.id)}</h3><p class="small mono" style="margin:0">${esc(s.dose)}</p></div></div>
+        <div class="rc-head" style="margin-bottom:.15rem"><div class="stack-t">${catAv(m)}<div><h3 style="margin:0 0 .15rem">${monoLink(s.id)}</h3><p class="stack-dose">${esc(s.dose)}</p></div></div>
         <div style="display:flex;gap:.35rem;flex-wrap:wrap">${tf('acute')}${grade(d.best_grade_acute)}${gate(d.safety_gate)}</div></div>
         <p class="stack-best">${icon('target')}<span><b>Best for:</b> ${esc(s.best)}</span></p>
         <div class="kpis">${s.kpi.map(([k, v, sub]) => `<div class="kpi"><span class="kpi-k">${esc(k)}</span><span class="kpi-v">${esc(v)}</span>${sub ? `<span class="kpi-s">${esc(sub)}</span>` : ''}</div>`).join('')}</div>
@@ -958,7 +971,7 @@
     return `<div class="px-page">
     <header class="px-hero">
       <div class="eyebrow">Brain Food protocol</div>
-      <h1>The Limitless Protocol</h1>
+      <div class="px-hero-top"><h1>The Limitless Protocol</h1>${shareBtn()}</div>
       <p class="lead">No pill makes a brain limitless. The closest real thing is a protocol: <strong>first remove what holds your brain back, then add what pushes it forward</strong>, today and over the years, through what you eat, what you take and what you do.</p>
       <div class="px-formula" aria-label="How the protocol works">
         <span class="px-f px-f-rm">${icon('brake')}<span><small>Step 1</small>Remove what limits</span></span>${icon('arrow', 'px-f-arrow')}<span class="px-f px-f-up">${icon('trend')}<span><small>Step 2</small>Boost what drives</span></span>
@@ -1222,7 +1235,7 @@
       return `<div class="profile-page">
       <div class="pf-result-hero"><div class="eyebrow">Your profile type</div><h1>${esc(r.T[0])}</h1><p class="pf-tag">${esc(r.T[1])}</p><p class="pf-note">A descriptive pattern drawn from your answers, not a diagnosis. Habits come first in each row because they carry no side effects.</p>
         <div class="pf-chips">${chips.map(c => `<span class="pill">${esc(c)}</span>`).join('')}</div>
-        <div class="pf-actions"><button type="button" class="btn" data-pq="reset">Retake the questions</button><button type="button" class="btn" data-pq="print">Print or save as PDF</button><button type="button" class="btn ghost" data-pq="forget">Delete my answers</button><span class="pf-privacy">${icon('lock')}Your answers stay in this browser; nothing is sent anywhere. Bookmark this page to keep your result.</span></div></div>
+        <div class="pf-actions"><button type="button" class="btn" data-pq="reset">Retake the questions</button><button type="button" class="btn" data-pq="print">Print or save as PDF</button>${shareBtn()}<button type="button" class="btn ghost" data-pq="forget">Delete my answers</button><span class="pf-privacy">${icon('lock')}Your answers stay in this browser; nothing is sent anywhere. Bookmark this page to keep your result.</span></div></div>
       ${r.warn.length ? `<div class="pf-warn"><strong>Before anything else</strong><ul>${r.warn.map(w => `<li>${esc(w)}</li>`).join('')}</ul></div>` : ''}
       <div class="pf-grid">
         ${quad('k-act now', PI.act, 'Best non-pill action · short term', 'acute', r.actNow)}
@@ -1375,6 +1388,7 @@
     const m = byId[id];
     if (!m) return `<div class="page-head"><div><h1>Ingredient not found</h1><p class="lead">There is no ingredient with the id <code>${esc(id)}</code>. <a href="#database">Browse all ingredients</a> or press <kbd>/</kbd> to search.</p></div></div>`;
     if (ist.id !== id) { ist.id = id; ist.tab = 'overview'; }
+    noteRecent(id);
     const d = m._derived, s = m.safety || {}, r = m.regulatory || {}, f = m.formulation || {}, sc = m.scores || {};
     const studies = m.studies || [];
     const sid = x => `<a href="#" class="ref" data-ref="${esc(x)}">${esc(x)}</a>`;
@@ -1406,12 +1420,12 @@
     const gTile = (ic, k, g, row, none) => tile(ic, k, g ? `${grade(g)}${GRADE_WORD[g]}` : `${grade(null)}No grade`, g ? (row ? `${esc(lab(DOMAIN_LABEL, row.domain))} in ${esc(popWord(row.population))}` : 'Best grade for a measured benefit') : none);
     const nulls = (m.evidence_by_outcome || []).filter(x => ['no_benefit', 'harm'].includes(x.direction) && 'AB'.includes(x.grade || 'x'));
     const cmpIds = [m.id].concat(CMP.filter(x => x !== m.id)).slice(0, 4);
-    const TABS = [['overview', 'Overview'], ['evidence', 'Evidence', (m.evidence_by_outcome || []).length], ['safety', 'Safety & rules'], ['studies', 'Studies', studies.length]];
+    const TABS = [['overview', 'Overview'], ['evidence', 'Evidence', (m.evidence_by_outcome || []).length], ['safety', 'Safety & rules'], ['studies', 'Studies', d.n_studies]];
     const pane = (k, body) => `<section class="tabpane" data-tab="${k}" id="pane-${k}" role="tabpanel" aria-labelledby="tab-${k}"${ist.tab === k ? '' : ' hidden'}>${body}</section>`;
     return `<div class="ing-page">
     <nav class="crumbs" aria-label="Breadcrumb"><a href="#database">Ingredients</a>${icon('chev')}<span>${esc(m.category)} · ${esc(m.category_name)}</span></nav>
     <div class="ing-hero"><div><div class="ing-title">${catAv(m, 'lg')}<h1>${esc(m.name)}</h1></div><p class="verdict">${esc(m.one_line_verdict)}</p></div>
-      <div class="ing-actions"><a class="btn" href="#compare.${esc(cmpIds.join(','))}">${icon('columns')}Compare</a><button type="button" class="btn ghost" data-open="help">${icon('help')}Reading guide</button></div></div>
+      <div class="ing-actions">${cmpTog(m, true)}${shareBtn()}</div></div>
     <section class="qa" aria-labelledby="qa-t"><div class="qa-h"><h2 id="qa-t">Does it actually help?</h2><p>Human studies only. Biomarkers and mood never count.</p></div>
       ${QA_GOALS.map(([q, sub, doms, onlyTf]) => { const x = quickAnswer(m, doms, onlyTf); return `<div class="qa-row"><div class="qa-q">${esc(q)}<small class="muted">${esc(sub)}</small></div><div class="qa-a ${(VERDICT[x.a] || VERDICT.Unclear)[1]}">${vIcon(x.a)}${esc(x.a)}</div><div class="qa-d">${x.d}</div></div>`; }).join('')}
     </section>
@@ -1443,10 +1457,10 @@
       <div class="section prose" id="safety"><h2>Safety</h2>${md(s.summary)}<dl class="kv"><dt>Adverse effects</dt><dd>${fmtList(s.adverse_effects)}</dd><dt>Contraindications</dt><dd>${fmtList(s.contraindications)}</dd><dt>Drug interactions</dt><dd>${fmtList(s.drug_interactions)}</dd><dt>Upper limits</dt><dd>${inline(s.upper_limits)}</dd><dt>Sleep impact</dt><dd>${inline(s.sleep_impact)}</dd><dt>Long-term exposure</dt><dd>${inline(s.long_term_exposure_studied)}</dd><dt>Daily use appropriate</dt><dd>${esc(s.daily_use_appropriate)}</dd><dt>Special populations</dt><dd>${inline(s.special_populations)}</dd><dt>Specialist review</dt><dd>${esc((s.specialist_review_needed || []).join(', ') || 'none flagged')}</dd><dt>Hard safety gate</dt><dd>${gate(s.hard_safety_gate)} ${inline(s.gate_reason)}</dd></dl></div>
       <div class="section prose" id="regulatory"><h2>Regulatory status</h2><dl class="kv"><dt>European Union</dt><dd>${md(r.eu)}</dd><dt>United States</dt><dd>${md(r.us)}</dd><dt>Morocco</dt><dd>${md(r.morocco)}</dd><dt>Authorised claim examples</dt><dd>${fmtList(r.permitted_claims_examples)}</dd><dt>Novel food / NDI issues</dt><dd>${inline(r.novel_food_or_ndi_issues)}</dd><dt>Regulatory gate</dt><dd>${gate(r.regulatory_gate)}</dd></dl></div>
       <div class="section prose" id="formulation"><h2>Formulation and food suitability</h2><dl class="kv"><dt>Food suitability</dt><dd>${inline(f.food_suitability)}</dd><dt>Formats</dt><dd>${esc((f.formats || []).join(', ') || '—')}</dd><dt>Stability</dt><dd>${inline(f.stability)}</dd><dt>Taste</dt><dd>${inline(f.taste)}</dd><dt>Matrix / bioavailability</dt><dd>${inline(f.bioavailability_matrix)}</dd><dt>Dose feasibility</dt><dd>${inline(f.dose_feasibility)}</dd><dt>Cost and availability</dt><dd>${inline(f.cost_availability)}</dd><dt>Cost evidence</dt><dd>${inline(f.cost_evidence)}</dd></dl></div>`)}
-    ${pane('studies', `
+    ${pane('studies', READY.details ? `
       <div class="section" id="studies"><h2>Studies (${studies.length})</h2><p class="small">Ordered: systematic reviews, supporting, mixed, null/negative, safety, mechanistic. Open a study for the full extraction. The badge shows whether its record was confirmed against PubMed or Crossref.</p>${sorted.map(studyCard).join('')}</div>
       <div class="section" id="search"><h2>Search log</h2><div class="tbl-wrap"><table class="tbl"><thead><tr><th>Database</th><th>Query</th><th>Date</th><th>Hits</th></tr></thead><tbody>${(m.search_log || []).map(q => `<tr><td>${esc(q.database)}</td><td class="wrap mono small">${esc(q.query)}</td><td>${esc(q.date)}</td><td class="num">${esc(q.hits)}</td></tr>`).join('')}</tbody></table></div><h3>Coverage notes</h3><div class="prose">${md(m.coverage_notes)}</div></div>
-      <div id="review">${m._critique ? critiqueBlock(m._critique) : ''}</div>`)}
+      <div id="review">${m._critique ? critiqueBlock(m._critique) : ''}</div>` : loadingHtml('the studies'))}
     </div>`;
   }
   function setITab(app, t) {
@@ -1692,6 +1706,33 @@
   function applyTheme(t) { const r = document.documentElement; if (!r) return; if (t === 'system') r.removeAttribute('data-theme'); else r.setAttribute('data-theme', t); }
   applyTheme(getTheme());
 
+  // ---------- background data: first paint uses the slim monographs; the rest arrives just after ----------
+  const VER = (() => { try { const c = document.currentScript; return (c && c.src && c.src.split('?')[1]) || ''; } catch (e) { return ''; } })();
+  const LAZY = { details: ['details.js', 'monograph_details'], syn: ['syntheses.js', 'syntheses'], bib: ['bibliography.js', 'bibliography'] };
+  const READY = {}, PENDING = {};
+  function absorb(k) {
+    if (k === 'details') { const x = D.monograph_details || {}; MONOS.forEach(m => Object.assign(m, x[m.id] || {})); }
+    else if (k === 'syn') Object.assign(SYN, D.syntheses || {});
+    else if (k === 'bib') BIB.push(...(D.bibliography || []));
+    READY[k] = true; SEARCH_INDEX = null;
+  }
+  Object.keys(LAZY).forEach(k => { if (D[LAZY[k][1]]) absorb(k); });  // already present (smoke test, single-file copies)
+  function loadLazy(k) {
+    if (READY[k]) return Promise.resolve();
+    if (!PENDING[k]) PENDING[k] = new Promise((res, rej) => {
+      const sc = document.createElement('script');
+      sc.src = 'data/' + LAZY[k][0] + (VER ? '?' + VER : '');
+      sc.onload = () => { absorb(k); res(); };
+      sc.onerror = () => { PENDING[k] = null; sc.remove(); rej(new Error('could not load ' + k)); };
+      document.body.appendChild(sc);
+    });
+    return PENDING[k];
+  }
+  // what a view cannot render without; and which views re-render to add late detail
+  const NEEDS = v => v === 'search' ? ['details', 'syn', 'bib'] : v === 'bibliography' ? ['bib'] : LIB_OF[v] && v !== 'compare' && v !== 'matrix' ? ['syn'] : [];
+  const REFRESH = { details: ['ingredient'], syn: ['home'] };
+  const loadingHtml = what => `<div class="loading-view" role="status"><span class="spinner" aria-hidden="true"></span><p>Loading ${esc(what)}…</p></div>`;
+
   // ---------- navigation ----------
   const VIEWS = { home: viewHome, library: viewLibrary, pill: viewPill, nzt48: viewNZT48, goals: viewGoals, summary: viewSummary, decisions: viewDecisions, methodology: viewMethodology, database: viewDatabase, acute: viewAcute, longterm: viewLongterm, populations: viewPopulations, combinations: viewCombinations, rankings: viewRankings, myths: viewMyths, foundations: viewFoundations, safety: viewSafety, regulatory: viewRegulatory, competitors: viewCompetitors, products: viewProducts, costs: viewCosts, validation: viewValidation, instruments: viewInstruments, brand: viewBrand, bibliography: viewBibliography };
   // in-page router: the current view lives in CURRENT, so navigation works even where the host frame ignores hash changes
@@ -1747,7 +1788,7 @@
     const s = q.trim().toLowerCase();
     const ingItem = m => ({ href: '#ingredient.' + m.id, t: m.name, s: m.category_name, ic: CAT_IC[m.category] || 'leaf', m });
     const pageItem = p => ({ href: '#' + p.k, t: p.t, s: p.d, ic: p.ic });
-    if (!s) return [['Go to', ALL_PAGES.slice(0, PRIMARY.length).map(pageItem)], ['Popular ingredients', ['caffeine', 'creatine', 'l-theanine', 'omega-3-dha-epa', 'bacopa-monnieri'].filter(id => byId[id]).map(id => ingItem(byId[id]))]];
+    if (!s) return (RECENT.length ? [['Recently viewed', RECENT.slice(0, 4).map(id => ingItem(byId[id]))]] : []).concat([['Go to', ALL_PAGES.slice(0, PRIMARY.length).map(pageItem)], ['Popular ingredients', ['caffeine', 'creatine', 'l-theanine', 'omega-3-dha-epa', 'bacopa-monnieri'].filter(id => byId[id]).map(id => ingItem(byId[id]))]]);
     const words = s.split(/\s+/).filter(Boolean);
     const score = (head, body) => { let sc = 0; for (const w of words) { if (head.startsWith(w)) sc += 6; else if (new RegExp('\\b' + escRe(w)).test(head)) sc += 4; else if (head.includes(w)) sc += 2; else if (body.includes(w)) sc += 1; else return 0; } return sc; };
     const ings = MONOS.map(m => ({ m, sc: score(m.name.toLowerCase(), [(m.aliases || []).join(' '), (m.food_sources || []).join(' '), m.category_name].join(' ').toLowerCase()) })).filter(x => x.sc)
@@ -1848,6 +1889,16 @@
     const ae = document.activeElement, keepId = ae && ae.id && app.contains && app.contains(ae) ? ae.id : null;
     const caret = keepId && typeof ae.selectionStart === 'number' ? ae.selectionStart : null;
     let html;
+    // pages built on documents that load in the background wait for them; everything else paints at once
+    const need = NEEDS(view).filter(k => !READY[k]);
+    if (need.length) {
+      document.body.classList.remove('nzt-takeover');
+      app.innerHTML = crumbs(view) + loadingHtml('this page');
+      renderNav(); renderTabbar(); setDrawer(false);
+      Promise.all(need.map(loadLazy)).then(() => { if (route().view === view) _render(); },
+        () => { if (route().view === view) app.innerHTML = '<div class="page-head"><div><h1>This page could not load</h1><p class="lead">Check your connection, then <a href="#' + esc(CURRENT) + '">try again</a>.</p></div></div>'; });
+      return;
+    }
     try {
       if (view === 'ingredient') html = viewIngredient(param);
       else if (view === 'compare') html = viewCompare(param);
@@ -1906,8 +1957,10 @@
     app.querySelectorAll('a.ref[data-ref]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); const el = document.getElementById('study-' + a.dataset.ref); if (el) { const p = el.closest('.tabpane'); if (p && p.hidden) setITab(app, p.dataset.tab); el.open = true; el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } }));
     app.querySelectorAll('.toc a[data-jump]').forEach(a => a.addEventListener('click', e => { e.preventDefault(); const el = document.getElementById(a.dataset.jump); if (el) el.scrollIntoView({ behavior: 'smooth' }); }));
     app.querySelectorAll('.tabs').forEach(tabs => tabs.querySelectorAll('button[data-tab]').forEach(b => b.addEventListener('click', () => { tabs.querySelectorAll('button').forEach(x => x.classList.toggle('active', x === b)); const pane = tabs.parentElement; pane.querySelectorAll('.tabpane').forEach(p => { p.hidden = p.id !== b.dataset.tab; }); })));
+    buildOnPage(app, view);
     renderNav();
     renderTabbar();
+    renderTray();
     setDrawer(false);
     if (!window.__tblKeepScroll) {
       window.scrollTo(0, 0);
@@ -1929,6 +1982,79 @@
       else if (e.key === '?') { e.preventDefault(); openOverlay('help'); }
     }
   });
+  // ---------- compare tray: pick up to four ingredients anywhere, compare them in one click ----------
+  function toggleTray(id) {
+    const i = TRAY.indexOf(id);
+    if (i >= 0) TRAY.splice(i, 1);
+    else if (TRAY.length >= 4) { toast('Compare holds four ingredients. Remove one first.'); return; }
+    else TRAY.push(id);
+    store.set('bf-compare', TRAY);
+    syncTray();
+  }
+  function syncTray() {
+    document.querySelectorAll('.cmp-tog[data-cmptog]').forEach(b => {
+      const on = TRAY.includes(b.dataset.cmptog), m = byId[b.dataset.cmptog];
+      b.setAttribute('aria-pressed', String(on)); b.title = (on ? 'Remove from' : 'Add to') + ' compare';
+      b.innerHTML = icon(on ? 'check' : 'plus') + (b.classList.contains('btn') ? `<span>${on ? 'In compare' : 'Add to compare'}</span>` : `<span class="sr">Compare ${esc(m ? m.name : '')}</span>`);
+    });
+    renderTray();
+  }
+  function renderTray() {
+    const el = document.getElementById('tray');
+    if (!el) return;
+    const v = route().view, show = TRAY.length > 0 && v !== 'compare' && v !== 'nzt48';
+    el.hidden = !show;
+    document.body.classList.toggle('has-tray', show);
+    el.innerHTML = show ? `<div class="tray-in"><span class="tray-l">${icon('columns')}<span>Compare</span></span>
+      <div class="tray-items">${TRAY.map(id => `<span class="tray-it">${catAv(byId[id], 'sm')}<span class="tray-n">${esc(byId[id].name.replace(/ \(.*\)$/, ''))}</span><button type="button" class="tray-x" data-cmptog="${esc(id)}" aria-label="Remove ${esc(byId[id].name)} from compare">${icon('x')}</button></span>`).join('')}</div>
+      <button type="button" class="btn primary sm" data-traygo${TRAY.length < 2 ? ' disabled' : ''}>${TRAY.length < 2 ? 'Add one more' : `Compare ${TRAY.length}`}</button>
+      <button type="button" class="icon-btn tray-clear" data-trayclear aria-label="Clear compare">${icon('x')}</button></div>` : '';
+  }
+  // ---------- small confirmations ----------
+  let toastEl = null, toastT = 0;
+  function toast(msg) {
+    if (!toastEl) { toastEl = document.createElement('div'); toastEl.className = 'toast'; toastEl.setAttribute('role', 'status'); document.body.appendChild(toastEl); }
+    toastEl.textContent = msg; toastEl.classList.add('on');
+    clearTimeout(toastT); toastT = setTimeout(() => toastEl.classList.remove('on'), 2400);
+  }
+  function sharePage() {
+    const url = location.href.split('#')[0] + '#' + CURRENT;
+    const h = document.querySelector('#app h1');
+    const title = (h ? h.textContent.trim() + ' · ' : '') + 'Brain Food Evidence Atlas';
+    if (navigator.share) { navigator.share({ title, url }).catch(() => { /* closed */ }); return; }
+    if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(() => toast('Link copied'), () => toast(url));
+    else toast(url);
+  }
+  // ---------- long research pages: a sticky "on this page" bar that follows the reader ----------
+  let spy = null;
+  function buildOnPage(app, view) {
+    if (spy) { spy.disconnect(); spy = null; }
+    app.classList.remove('has-onpage');
+    if (!LIB_OF[view] || typeof IntersectionObserver === 'undefined' || !app.querySelectorAll) return;
+    const hs = Array.from(app.querySelectorAll('h2')).filter(h => !h.closest('.site-foot, .pager, figure, details, .onpage') && h.textContent.trim());
+    if (hs.length < 4) return;
+    hs.forEach((h, i) => { if (!h.id) h.id = 'sec-' + (i + 1); });
+    const anchor = app.querySelector('.page-head') || app.querySelector('h1');
+    if (!anchor) return;
+    anchor.insertAdjacentHTML('afterend', `<nav class="onpage" aria-label="On this page"><span class="onpage-l">${icon('list')}<span>On this page</span></span><div class="onpage-chips">${hs.map(h => `<button type="button" data-goto="${esc(h.id)}">${esc(h.textContent.trim().replace(/\s+/g, ' ').slice(0, 44))}</button>`).join('')}</div></nav>`);
+    app.classList.add('has-onpage');
+    const bar = app.querySelector('.onpage-chips');
+    const mark = id => bar.querySelectorAll('button').forEach(b => {
+      const on = b.dataset.goto === id;
+      b.classList.toggle('on', on);
+      if (on) bar.scrollTo({ left: b.offsetLeft - bar.clientWidth / 2 + b.offsetWidth / 2, behavior: 'smooth' });
+    });
+    bar.querySelectorAll('[data-goto]').forEach(b => b.addEventListener('click', () => { const el = document.getElementById(b.dataset.goto); if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); mark(b.dataset.goto); } }));
+    spy = new IntersectionObserver(es => { es.forEach(e => { if (e.isIntersecting) mark(e.target.id); }); }, { rootMargin: '-130px 0px -62% 0px' });
+    hs.forEach(h => spy.observe(h));
+  }
+  // back to top, once the reader is two screens down
+  let topBtn = null;
+  window.addEventListener('scroll', () => {
+    const on = window.scrollY > window.innerHeight * 2;
+    if (on && !topBtn) { topBtn = document.createElement('button'); topBtn.type = 'button'; topBtn.className = 'to-top'; topBtn.setAttribute('aria-label', 'Back to top'); topBtn.innerHTML = icon('up'); topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' })); document.body.appendChild(topBtn); }
+    if (topBtn) topBtn.classList.toggle('on', on);
+  }, { passive: true });
   // one shared tooltip for figures: hover or keyboard focus (or a tap) shows it; plain text only, never HTML
   let tipEl = null;
   function showTip(t) {
@@ -1953,6 +2079,11 @@
     if (!t) return;
     const op = t.closest('[data-open]');
     if (op) { e.preventDefault(); openOverlay(op.dataset.open); return; }
+    const ct = t.closest('[data-cmptog]');
+    if (ct) { e.preventDefault(); toggleTray(ct.dataset.cmptog); return; }
+    if (t.closest('[data-traygo]')) { if (TRAY.length > 1) go('compare.' + TRAY.join(',')); return; }
+    if (t.closest('[data-trayclear]')) { TRAY.length = 0; store.set('bf-compare', TRAY); syncTray(); return; }
+    if (t.closest('[data-share]')) { e.preventDefault(); sharePage(); return; }
     const th = t.closest('[data-theme-set]');
     if (th) { const v = th.dataset.themeSet; try { localStorage.setItem('bf-theme', v); } catch (err) { /* storage blocked */ } applyTheme(v); renderNav(); return; }
     if (t.closest('.skip-link')) { e.preventDefault(); const m = document.getElementById('app'); if (m && m.focus) m.focus(); return; }
@@ -1968,6 +2099,8 @@
   document.getElementById('scrim').addEventListener('click', () => setDrawer(false));
   if (!MONOS.length) document.getElementById('app').innerHTML = '<div class="pending">No data files found. Run <code>python -I tools/build_data.py</code> to generate <code>app/data/*.js</code>, then reload.</div>';
   _render();
+  // then fetch the rest in the background, and refresh a page that was waiting on it
+  setTimeout(() => Object.keys(LAZY).forEach(k => loadLazy(k).then(() => { if ((REFRESH[k] || []).includes(route().view)) render(); }, () => { /* retried when a page needs it */ })), 30);
   // offline support on the standalone website only (the page links a manifest there; file:// and embedded copies skip this)
   if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator && /^https?:$/.test(location.protocol) && document.querySelector('link[rel="manifest"]')) {
     navigator.serviceWorker.register('sw.js').catch(() => { /* offline mode unavailable; the site still works online */ });
