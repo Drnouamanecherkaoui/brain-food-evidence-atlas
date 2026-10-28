@@ -113,6 +113,9 @@
     clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/>',
     share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/>',
     plus: '<path d="M12 5v14M5 12h14"/>',
+    pot: '<path d="M4 10h16v6a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4Z"/><path d="M2 10h20M9 6.5c0-1 .6-1.5.6-2.5M12.5 6.5c0-1 .6-1.5.6-2.5M16 6.5c0-1 .6-1.5.6-2.5"/>',
+    basket: '<path d="M4.5 10h15l-1.6 8.6a2 2 0 0 1-2 1.6H8.1a2 2 0 0 1-2-1.6Z"/><path d="M2.5 10h19M8.5 10l3.5-6 3.5 6M9.5 13.5v3.5M14.5 13.5v3.5"/>',
+    pin: '<path d="M12 21s-7-6.2-7-11.5a7 7 0 0 1 14 0C19 14.8 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.5"/>',
   };
   const icon = (k, cls) => `<svg class="ic${cls ? ' ' + cls : ''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[k] || ''}</svg>`;
   // every ingredient wears its category's icon, so lists can be scanned by shape
@@ -138,9 +141,10 @@
     ['database', 'Ingredients', 'Ingredients', 'leaf', `All ${MONOS.length} foods, nutrients, supplements and diets, with grades and safety.`],
     ['protocol', 'The Limitless Protocol', 'Limitless', 'infinity', 'Remove what limits your brain, then boost it: by food, pill and habit, for today and for years.'],
     ['pill', 'The Limitless Pill', 'Pill', 'pill', 'The best-proven stack, and three recipes: today, this week, for life.'],
+    ['cooking', 'The Cooking Lab', 'Cooking', 'pot', 'Step-by-step brain-food recipes with pictures, and when to buy each ingredient.'],
   ];
   // the phone tab bar keeps five tabs: the pill lives under the protocol's tab
-  const TAB_OF = { pill: 'protocol' };
+  const TAB_OF = { pill: 'protocol', cooking: 'protocol' };
   const LIB = [
     { key: 'evidence', t: 'Explore the evidence', ic: 'grid', d: 'The graded findings, cut nine ways.', items: [
       ['matrix', 'Evidence matrix', 'Every ingredient against every brain outcome, on one screen.', 'table'],
@@ -826,7 +830,8 @@
     <div class="callout"><strong>What this is, honestly:</strong> a caffeine-led alertness/attention/reaction-time stack with theanine to blunt jitteriness, plus two situational additions — creatine for sleep-deprived rescue only, and American ginseng for working memory. It will make a rested person feel and test faster and more focused for a few hours. It will not create insight, learning capacity, or the fictional step-change Limitless depicts, and it borrows from sleep if timed late in the day.</div>
     <a class="px-backlink" href="#protocol">${icon('infinity')}<span><strong>The pill is one part of a bigger plan.</strong> The Limitless Protocol first removes what limits your brain, then boosts it, with food, pills and habits, for today and for years.</span>${icon('arrow')}</a>
     <div class="section" id="recipes"><h2>Three recipes, one per timeframe</h2><p class="small muted">Same evidence base as the rest of this page, turned into something you'd actually make: a drink for today, a short protocol for a demanding week, and a daily pattern for the years that actually move long-term cognitive outcomes. Grades and the honest catch are per recipe below.</p>
-      <div class="recipe-grid">${recipes.map(recipeCard).join('')}</div></div>
+      <div class="recipe-grid">${recipes.map(recipeCard).join('')}</div>
+      <a class="px-backlink" href="#cooking">${icon('pot')}<span><strong>Cook them step by step.</strong> The Cooking Lab has every step with a picture, and when to buy each ingredient.</span>${icon('arrow')}</a></div>
     <div class="section" id="stack-section"><h2>The acute stack, in order of evidence strength</h2><p class="small muted">Grade shown is the best acute grade on file for that ingredient; gate is the safety-review outcome. Full dosing, interaction and safety detail is on each ingredient's own page — this page is a summary, not a replacement for it.</p>
       ${timingFigure()}
       <div class="stack-grid">${stack.map((s, i) => card(s, i + 1)).join('')}</div>
@@ -849,7 +854,7 @@
         ],
         take: [
           { id: 's-rescue', t: 'Slept badly? Caffeine is the rescue', how: '100–200 mg once (one or two strong coffees), at least 9 hours before bed', why: 'Sleep loss is where caffeine works best: large gains in attention and reaction time, comparable to modafinil in the trials that compared them.', ev: [['caffeine', 'A', 'acute']], c: 'It hides tiredness for 2–4 hours; it does not repay the sleep. Not for pregnancy, under-18s, anxiety or heart problems.' },
-          { id: 's-glycine', t: 'Glycine 3 g at bedtime on short-sleep nights', how: '3 g powder in water shortly before bed, for up to 3 nights', why: 'In adults kept on short sleep, it reduced next-day fatigue and improved next-day vigilance.', ev: [['glycine', 'B', 'short_term_days']], c: 'One small trial, funded by the maker. Not tested in well-rested people.' },
+          { id: 's-glycine', t: 'Glycine 3 g at bedtime on short-sleep nights', how: '3 g powder in water shortly before bed, for up to 3 nights', why: 'In adults kept on short sleep, it reduced next-day fatigue and improved next-day vigilance.', ev: [['glycine', 'B', 'short_term_days']], more: ['cooking.deadline', 'The Deadline-Week Kit, step by step'], c: 'One small trial, funded by the maker. Not tested in well-rested people.' },
         ],
         do: [
           { id: 's-sleep', t: 'Get the sleep back', how: 'Sleep, before anything else on this page', why: 'A night without sleep causes large drops in simple attention, the biggest brake measured across 70 studies. Sleep loss before learning also cuts how much you remember.', src: [['Lim & Dinges 2010', '20438143'], ['Newbury et al. 2021', '35238586']] },
@@ -859,7 +864,7 @@
       },
       boost: {
         eat: [
-          { id: 's-cup', t: 'Coffee, tea or matcha, 30–60 minutes before', how: 'One coffee (about 80–100 mg caffeine) or 2.5–3 g matcha (about 70 mg caffeine and 50 mg L-theanine)', why: 'Faster reactions and steadier attention for a few hours: the best-proven same-day effect, in food form.', ev: [['coffee', 'A', 'acute'], ['tea-and-green-tea', 'B', 'acute']], c: 'A small effect, and in daily drinkers partly the end of overnight withdrawal. Keep tea away from iron-rich meals (see Long-term).' },
+          { id: 's-cup', t: 'Coffee, tea or matcha, 30–60 minutes before', how: 'One coffee (about 80–100 mg caffeine) or 2.5–3 g matcha (about 70 mg caffeine and 50 mg L-theanine)', why: 'Faster reactions and steadier attention for a few hours: the best-proven same-day effect, in food form.', ev: [['coffee', 'A', 'acute'], ['tea-and-green-tea', 'B', 'acute']], more: ['cooking.matcha', 'Make the matcha shot, step by step'], c: 'A small effect, and in daily drinkers partly the end of overnight withdrawal. Keep tea away from iron-rich meals (see Long-term).' },
         ],
         take: [
           { id: 's-pill', t: 'The Limitless Pill core: caffeine + L-theanine', how: '75–100 mg caffeine with 100–200 mg L-theanine, 30–60 minutes before the task; no more than 2 a day', why: 'Caffeine is grade A for reaction time and attention. Theanine adds smoother focus with less jitter.', ev: [['caffeine', 'A', 'acute'], ['l-theanine', 'B', 'acute']], more: ['pill', 'Open the Limitless Pill'], c: 'Whether theanine adds anything beyond caffeine alone is still unproven. Count every coffee and energy drink toward 400 mg a day.' },
@@ -892,8 +897,8 @@
       },
       boost: {
         eat: [
-          { id: 'l-med', t: 'Eat the Mediterranean way, most days', how: 'Vegetables, legumes, whole grains, fish, nuts and olive oil; little red meat and few sweets', why: 'Linked to lower dementia risk in long studies. In trials, the gains came when diet was combined with exercise and mental and social activity.', ev: [['mediterranean-diet', 'B', 'chronic'], ['mind-diet', 'B', 'chronic']], c: 'The one 3-year trial of the MIND diet alone found no benefit over a control diet, and none has been run in healthy young adults.' },
-          { id: 'l-nuts', t: 'A handful of nuts, and berries often', how: 'About 30 g of nuts a day; berries a few times a week', why: 'Both improve blood-vessel health, which the brain depends on.', ev: [['nuts-walnuts-almonds', 'B', 'chronic'], ['blueberry-anthocyanins', 'B', 'chronic']], c: 'Better vessels, not proven better thinking: the cognition trials are small and mixed.' },
+          { id: 'l-med', t: 'Eat the Mediterranean way, most days', how: 'Vegetables, legumes, whole grains, fish, nuts and olive oil; little red meat and few sweets', why: 'Linked to lower dementia risk in long studies. In trials, the gains came when diet was combined with exercise and mental and social activity.', ev: [['mediterranean-diet', 'B', 'chronic'], ['mind-diet', 'B', 'chronic']], more: ['cooking.plate', 'The sardine, lentil and greens plate, step by step'], c: 'The one 3-year trial of the MIND diet alone found no benefit over a control diet, and none has been run in healthy young adults.' },
+          { id: 'l-nuts', t: 'A handful of nuts, and berries often', how: 'About 30 g of nuts a day; berries a few times a week', why: 'Both improve blood-vessel health, which the brain depends on.', ev: [['nuts-walnuts-almonds', 'B', 'chronic'], ['blueberry-anthocyanins', 'B', 'chronic']], more: ['cooking.bowl', 'The Morning MIND Bowl, step by step'], c: 'Better vessels, not proven better thinking: the cognition trials are small and mixed.' },
         ],
         take: [
           { note: 'Honest answer: no pill has strong evidence for making a healthy brain better over months or years. These are the exceptions, each for one group of people.' },
@@ -1006,6 +1011,169 @@
     app.querySelectorAll('[data-ptab]').forEach(b => { const on = b.dataset.ptab === t; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
     app.querySelectorAll('.px-pane').forEach(p => { p.hidden = p.dataset.pane !== t; });
     CURRENT = 'protocol.' + t;
+    try { history.replaceState(null, '', '#' + CURRENT); } catch (e) { /* sandboxed frame */ }
+  }
+
+  // ---------- the Cooking Lab: evidence-built recipes, a picture for every step, and when to buy each thing ----------
+  // illustrations: hand-drawn SVG scenes on a light "photo" tile (they stay light in dark mode, like a photograph)
+  const dots = (pts, r, cls) => `<g class="${cls}">${pts.map(([x, y], i) => `<circle cx="${x}" cy="${y}" r="${Array.isArray(r) ? r[i % r.length] : r}"/>`).join('')}</g>`;
+  const leaf = (x, y, rot, s) => `<path class="o green" transform="translate(${x} ${y}) rotate(${rot}) scale(${s || 1})" d="M0 0c6-8 18-8 22 0-4 8-16 8-22 0Z"/>`;
+  const sardine = (x, y, s) => `<g transform="translate(${x} ${y}) scale(${s || 1})"><path class="o fish" d="M0 0c14-9 34-9 46 0l9-6v12l-9-6c-12 9-32 9-46 0Z"/><circle class="ink-f" cx="8" cy="-1.5" r="1.6"/><path class="fine" d="M15-4.5c3.5 3 3.5 6 0 9"/></g>`;
+  const bottle = x => `<g transform="translate(${x} 0)"><rect class="o dark" x="6" y="16" width="14" height="10" rx="2"/><path class="o beet" d="M6 26h14v6c7 3 10 8 10 15v40a5 5 0 0 1-5 5H1a5 5 0 0 1-5-5V47c0-7 3-12 10-15Z"/><rect class="o paper" x="-1" y="56" width="28" height="17" rx="2"/><text class="lbl s" x="13" y="67.5" text-anchor="middle">70 ml</text></g>`;
+  const IL = {
+    scale: `<ellipse class="shadow" cx="80" cy="97" rx="56" ry="5"/><rect class="o metal" x="28" y="70" width="104" height="24" rx="7"/><rect class="screen" x="58" y="76" width="44" height="12" rx="2.5"/><text class="scr" x="80" y="85" text-anchor="middle">2.7 g</text><ellipse class="o metal" cx="80" cy="66" rx="42" ry="5.5"/><path class="o mat" d="M58 64c6-16 15-22 22-22s16 6 22 22Z"/>`,
+    sieve: `<ellipse class="shadow" cx="80" cy="101" rx="50" ry="4"/><path class="o warm" d="M36 70h88c0 18-20 30-44 30S36 88 36 70Z"/><ellipse class="o mat" cx="80" cy="70" rx="44" ry="6"/>${dots([[72, 52], [80, 58], [88, 51], [76, 62], [85, 63], [69, 58], [92, 58]], 1.8, 'mat-f')}<path class="o" d="M108 37l32-12"/><ellipse class="o metal" cx="82" cy="37" rx="27" ry="8"/><path class="fine" d="M58 37h48M63 33.5h38M63 40.5h38M72 30.5v13M82 29.5v15M92 30.5v13"/><ellipse class="mat" cx="82" cy="35" rx="15" ry="3.5"/>`,
+    kettle: `<ellipse class="shadow" cx="72" cy="96" rx="40" ry="4"/><path class="o" d="M45 56c-16 6-15 22-2 28"/><path class="o metal" d="M46 93l5-40c8-8 30-8 38 0l5 40Z"/><path class="o metal" d="M92 64l22-14 3 5-21 18"/><circle class="o metal" cx="70" cy="44" r="4"/><path class="steam" d="M120 44c5-5-3-9 2-14M128 46c5-5-3-9 2-14"/><rect class="o glass" x="132" y="22" width="11" height="60" rx="5.5"/><rect class="red" x="135.5" y="46" width="4" height="36"/><circle class="o red" cx="137.5" cy="88" r="7"/><text class="lbl" x="137.5" y="16" text-anchor="middle">75°</text>`,
+    whisk: `<ellipse class="shadow" cx="80" cy="101" rx="54" ry="4"/><path class="o warm" d="M28 62h104c0 22-23 36-52 36S28 84 28 62Z"/><ellipse class="o mat" cx="80" cy="62" rx="52" ry="8"/>${dots([[62, 60], [71, 63], [80, 59], [89, 63], [98, 60], [86, 65], [70, 58], [104, 63]], [2.2, 3, 2.6], 'froth')}<path class="handle" d="M106 8 92 40"/><path class="o" d="M92 40c-12 4-16 12-14 22M92 40c-6 6-8 13-7 22M92 40c-1 7 0 14 3 22M92 40c3 6 6 13 9 20"/><path class="acc" d="M44 84l7-7 7 7 7-7 7 7"/>`,
+    pour: `<ellipse class="shadow" cx="92" cy="101" rx="42" ry="4"/><g transform="rotate(28 50 40)"><path class="o" d="M28 38c-10 4-9 16-1 20"/><path class="o metal" d="M26 64l4-30c6-6 22-6 28 0l4 30Z"/><path class="o metal" d="M60 46l16-8 2 4-15 11"/></g><path class="stream" d="M76 57c2 4 3 8 3 13"/><path class="o warm" d="M54 70h76c0 17-17 28-38 28S54 87 54 70Z"/><ellipse class="o mat" cx="92" cy="70" rx="38" ry="6.5"/>${dots([[84, 69], [96, 71], [104, 68]], 2.2, 'froth')}`,
+    clock: `<ellipse class="shadow" cx="48" cy="96" rx="28" ry="3.5"/><path class="o" d="M70 56c14 0 14 22 0 22"/><path class="o warm" d="M24 50h46v26a14 14 0 0 1-14 14H38a14 14 0 0 1-14-14Z"/><ellipse class="o mat" cx="47" cy="50" rx="23" ry="5"/><circle class="o paper" cx="118" cy="50" r="27"/><path class="acc" d="M118 23a27 27 0 0 1 23.4 13.5"/><path class="fine" d="M118 26v4M118 70v4M94 50h4M138 50h4"/><path class="o" d="M118 50V33M118 50l12 6"/><circle class="ink-f" cx="118" cy="50" r="2.5"/><text class="lbl" x="118" y="96" text-anchor="middle">30–60 min before</text>`,
+    shots: `<ellipse class="shadow" cx="88" cy="99" rx="62" ry="4"/>${bottle(42)}${bottle(84)}<circle class="o beet" cx="138" cy="84" r="11"/><path class="o green" d="M138 73c-2-8-8-12-12-12 1 6 5 10 12 12ZM138 73c2-8 8-12 12-12-1 6-5 10-12 12Z"/>`,
+    calendar: `<ellipse class="shadow" cx="80" cy="103" rx="54" ry="4"/><rect class="o paper" x="28" y="20" width="104" height="80" rx="9"/><path class="beet" d="M37 20h86a9 9 0 0 1 9 9v9H28v-9a9 9 0 0 1 9-9Z"/><path class="o" d="M28 38h104M52 13v12M108 13v12"/>${[0, 1, 2, 3, 4, 5, 6].map(i => { const x = 40 + (i % 4) * 22, y = 46 + Math.floor(i / 4) * 24; return `<rect class="o ${i > 3 ? 'night' : 'cell'}" x="${x}" y="${y}" width="16" height="16" rx="4"/><path class="tick" d="M${x + 4} ${y + 8.5}l3 3 5.5-6.5"/>`; }).join('')}<path class="o flag" d="M110 70v20M110 70h14l-4 5 4 5h-14"/>`,
+    moon: `<ellipse class="shadow" cx="76" cy="99" rx="30" ry="3.5"/><path class="o lemon" d="M126 12a17 17 0 1 0 14 28 13 13 0 1 1-14-28Z"/><path class="fine" d="M104 20v6M101 23h6M146 60v5M143.5 62.5h5M30 30v5M27.5 32.5h5"/><path class="o glass" d="M54 32h44l-6 62H60Z"/><path class="milk" d="M57.2 54h37.6l-4 38H61.2Z"/><path class="o" d="M57.2 54h37.6"/><path class="spoon" d="M96 20 76 76"/>${dots([[70, 62], [80, 66], [74, 72], [84, 60]], 1.6, 'dust')}`,
+    finish: `<ellipse class="shadow" cx="80" cy="100" rx="40" ry="4"/><path class="o" d="M56 98V14"/><path class="o flagbg" d="M56 16h62l-10 17 10 17H56Z"/><path class="tick big" d="M74 33l7 7 13-14"/>${dots([[36, 30], [128, 70], [40, 74], [120, 92], [30, 52]], [2.4, 2], 'confetti')}<text class="lbl" x="98" y="78" text-anchor="middle">event day</text>`,
+    jar: `<ellipse class="shadow" cx="80" cy="102" rx="38" ry="3.5"/><rect class="o metal" x="46" y="18" width="68" height="11" rx="3"/><rect class="o glass" x="50" y="29" width="60" height="70" rx="10"/><path class="oat" d="M53 74h54v16a7 7 0 0 1-7 7H60a7 7 0 0 1-7-7Z"/><rect class="yog" x="53" y="56" width="54" height="18"/><path class="o" d="M53 56h54M53 74h54"/>${dots([[60, 82], [70, 88], [82, 80], [94, 86], [100, 79], [66, 92], [88, 92]], 2, 'oat-d')}<path class="snow" d="M138 26v24M127.6 32l20.8 12M127.6 44l20.8-12"/><path class="o lemon" d="M24 20a10 10 0 1 0 9 16 8 8 0 1 1-9-16Z"/>`,
+    compote: `<path class="flame" d="M64 108c-6-4-4-10 0-14 0 4 4 4 4 0 4 4 6 10 0 14ZM92 108c-6-4-4-10 0-14 0 4 4 4 4 0 4 4 6 10 0 14Z"/><path class="o" d="M32 54H20M128 54h12"/><path class="o metal" d="M32 48h96v30a14 14 0 0 1-14 14H46a14 14 0 0 1-14-14Z"/><ellipse class="o berry-l" cx="80" cy="48" rx="48" ry="7"/>${dots([[60, 46], [71, 44], [83, 47], [95, 44], [106, 47], [66, 50], [90, 50], [78, 42]], [4.6, 4], 'o berry')}<path class="steam" d="M62 30c5-5-3-9 2-14M80 28c5-5-3-9 2-14M98 30c5-5-3-9 2-14"/>`,
+    topbowl: `<ellipse class="shadow" cx="80" cy="102" rx="56" ry="4"/><path class="o warm" d="M24 56h112c0 26-25 42-56 42S24 82 24 56Z"/><ellipse class="o yog" cx="80" cy="56" rx="56" ry="11"/>${dots([[50, 56], [60, 60], [112, 56], [104, 61], [68, 52]], 1.8, 'oat-d')}${dots([[58, 53], [67, 58], [76, 52], [100, 54], [108, 59], [92, 61]], [4.6, 4], 'o berry')}<path class="o nut" d="M80 54c3-4 9-3 10 1s-4 7-8 5-4-3-2-6ZM88 60c3-3 8-2 8 2s-5 5-8 3-2-3 0-5ZM112 50c3-3 8-2 8 2s-5 5-8 3-2-3 0-5Z"/>`,
+    pot: `<ellipse class="shadow" cx="80" cy="99" rx="54" ry="4"/><path class="o" d="M32 52H20M128 52h12"/><path class="o metal" d="M32 46h96v32a14 14 0 0 1-14 14H46a14 14 0 0 1-14-14Z"/><ellipse class="o water" cx="80" cy="46" rx="48" ry="7"/>${dots([[56, 46], [62, 44], [68, 47], [74, 44], [80, 46], [86, 43], [92, 47], [98, 44], [104, 46], [65, 49], [83, 49], [101, 49], [71, 42], [89, 41]], [2.4, 2], 'lent')}<path class="steam" d="M60 30c5-5-3-9 2-14M80 28c5-5-3-9 2-14M100 30c5-5-3-9 2-14"/>`,
+    board: `<ellipse class="shadow" cx="78" cy="98" rx="60" ry="4"/><rect class="o wood" x="18" y="54" width="118" height="38" rx="12"/><circle class="o paper" cx="125" cy="73" r="4"/><circle class="o lemon" cx="40" cy="72" r="12"/><path class="fine" d="M40 60v24M29.6 66l20.8 12M29.6 78l20.8-12"/>${leaf(60, 70, -20, .8)}${leaf(70, 80, 15, .7)}${leaf(78, 66, -35, .7)}${leaf(88, 76, 5, .8)}<path class="spice" d="M100 82c2-8 8-10 12-10s10 2 12 10Z"/><path class="o metal" d="M70 40l56-14 2 6-54 16Z"/><path class="o dark" d="M54 45l17-5 2 6-17 5Z"/>`,
+    fish: `<ellipse class="shadow" cx="78" cy="99" rx="58" ry="4"/><path class="o" d="M134 70h22"/><rect class="o dark" x="22" y="54" width="112" height="38" rx="12"/><path class="grill" d="M34 64h88M34 73h88M34 82h88"/>${sardine(38, 66, .95)}${sardine(56, 81, .95)}${dots([[52, 64], [66, 62], [74, 79], [88, 82], [60, 84]], 1.6, 'herb-d')}<path class="steam" d="M60 40c5-5-3-9 2-14M84 38c5-5-3-9 2-14"/>`,
+    greens: `<ellipse class="shadow" cx="74" cy="98" rx="54" ry="4"/><path class="o" d="M120 76l32 8"/><ellipse class="o dark" cx="72" cy="76" rx="52" ry="18"/><ellipse class="pan-in" cx="72" cy="74" rx="44" ry="13"/>${leaf(42, 74, -10)}${leaf(58, 68, 20)}${leaf(66, 80, -25)}${leaf(82, 70, 10)}${leaf(90, 79, -15, .9)}<path class="oil" d="M50 66c2-2 4-2 4 0s-4 2-4 0ZM98 72c2-2 4-2 4 0s-4 2-4 0Z"/><path class="steam" d="M58 46c5-5-3-9 2-14M80 44c5-5-3-9 2-14"/>`,
+    plate: `<ellipse class="shadow" cx="80" cy="103" rx="48" ry="4"/><circle class="o paper" cx="80" cy="56" r="45"/><circle class="rim" cx="80" cy="56" r="36"/><path class="lent-f" d="M80 56 54 33a36 36 0 0 0-10 33Z"/>${dots([[60, 44], [56, 52], [64, 52], [52, 60], [60, 60], [68, 46]], 2.2, 'lent')}${leaf(54, 76, 10, .7)}${leaf(66, 84, -20, .7)}${leaf(78, 78, 15, .7)}${sardine(86, 44, .55)}${sardine(88, 60, .55)}<path class="o lemon" d="M104 22l16 10-19 6Z"/><path class="oil-s" d="M58 70c8 4 18 4 26-2"/>`,
+    tea: `<ellipse class="shadow" cx="46" cy="96" rx="20" ry="3"/><path class="o glass" d="M30 34h32l-4 58H34Z"/><path class="tea" d="M31.3 50h29.4l-3.1 40H34.4Z"/><path class="o" d="M31.3 50h29.4"/>${leaf(36, 34, -60, .55)}${leaf(46, 32, -100, .55)}<path class="acc" d="M72 62h20M86 56l6 6-6 6"/><circle class="o paper" cx="122" cy="60" r="22"/><path class="o" d="M122 60V45M122 60l10 5"/><circle class="ink-f" cx="122" cy="60" r="2.2"/><text class="lbl" x="122" y="100" text-anchor="middle">1 hour later</text>`,
+  };
+  const ill = (k, label) => `<svg class="ill" viewBox="0 0 160 110" role="img" aria-label="${esc(label || k)}">${IL[k] || ''}</svg>`;
+
+  // recipes: every amount and claim traces to the atlas (ev rows are checked by tools/smoke_test.cjs)
+  const KITCHEN = [
+    { id: 'matcha', name: 'Matcha Focus Shot', tf: 'acute', hero: 'whisk', time: '5 min', yields: '1 shot', when: 'Before focused work, by 2 pm',
+      what: 'A gentle coffee alternative: about 70 mg caffeine and 50 mg L-theanine, ready in five minutes.',
+      ev: [['caffeine', 'A', 'acute'], ['tea-and-green-tea', 'B', 'acute'], ['l-theanine', 'B', 'acute']],
+      ing: [['2.5–3 g', 'matcha, plain, unsweetened', 'tea-and-green-tea'], ['150 ml', 'water at 70–80 °C'], ['100 ml', 'warm milk or oat milk, for a latte (optional)']],
+      tools: ['Kitchen scale (0.1 g)', 'Fine sieve', 'Bamboo whisk or small milk frother', 'Kitchen thermometer', 'Small bowl'],
+      buy: [
+        ['1–2 weeks before', [
+          { n: 'Matcha, a small 20–30 g tin', id: 'tea-and-green-tea', where: 'Tea shop or online. Choose a brand that publishes pesticide-residue tests.', keep: 'Keep it closed, cool and dark: matcha oxidises and loses colour once opened. Buy small tins you finish within a few weeks.' },
+          { n: 'Scale, sieve, whisk or frother, thermometer', tool: true, where: 'Kitchen shop or online.', keep: 'Bought once.' }]],
+        ['The day you make it', [{ n: 'Milk or oat milk (optional)', where: 'Any grocer.', keep: 'Fridge, 2–6 °C.' }]],
+      ],
+      steps: [
+        { il: 'scale', t: 'Weigh the matcha', d: 'Weigh 2.5–3 g on the kitchen scale.', c: ['2.5–3 g'] },
+        { il: 'sieve', t: 'Sift it', d: 'Sift it into a small bowl to break up the clumps, so it whisks smooth.' },
+        { il: 'kettle', t: 'Heat the water to 70–80 °C', d: 'Not boiling. Let just-boiled water cool, and check it with the thermometer.', c: ['70–80 °C', '150 ml'] },
+        { il: 'whisk', t: 'Whisk it frothy', d: 'Add a splash of the water and whisk briskly in a “W” motion until frothy.' },
+        { il: 'pour', t: 'Top up', d: 'Add the rest of the water, or warm milk for a latte.' },
+        { il: 'clock', t: 'Drink it 30–60 minutes before the task', d: 'The effect lasts about 1–4 hours. Have your last cup by about 2 pm for an 11 pm bedtime.', c: ['30–60 min before', 'last one ~2 pm'] },
+      ],
+      catch_: 'One serving reaches the alertness dose of caffeine, but not the 97–250 mg of L-theanine used in the combination trials, so think of it as a gentle coffee. Two servings (5–6 g) give 140–150 mg of caffeine, above the 100 mg per serving this atlas uses as its safety cap.',
+      safety: 'Count it toward 400 mg of caffeine a day (200 mg if pregnant). Not for under-18s, or with anxiety or heart problems. Low in iron? Drink it at least an hour away from meals. Matcha contains vitamin K: on warfarin, keep your intake steady.' },
+    { id: 'deadline', name: 'Deadline-Week Kit', tf: 'short_term_days', hero: 'shots', time: '2 min a day', yields: '7 mornings, 3 nights', when: 'The 7 days before one big event',
+      what: 'A short loading protocol: a beetroot shot every morning for 7 days, and a glycine drink on the last 3 nights.',
+      ev: [['beetroot-nitrate', 'C', 'short_term_days'], ['glycine', 'B', 'short_term_days']],
+      ing: [['14 × 70 ml', 'concentrated beetroot shots (140 ml a day, about 12.8 mmol nitrate)', 'beetroot-nitrate'], ['9 g', 'glycine powder (3 g a night for 3 nights)', 'glycine'], ['1 glass', 'water or warm milk, each night']],
+      tools: ['Measuring scoop or 0.1 g scale', 'A glass and a spoon'],
+      buy: [
+        ['2 weeks before', [
+          { n: '14 concentrated beetroot shots', id: 'beetroot-nitrate', where: 'Sports-nutrition shop or online. Pick shots that state their nitrate content: the trial used about 12.8 mmol a day.', keep: 'Follow the label and refrigerate once opened. Nitrate stays stable when cold, but can turn into nitrite if stored badly.' },
+          { n: 'Glycine powder', id: 'glycine', where: 'Pharmacy, supplement shop or online. The label should say glycine only.', keep: 'Dry and closed: it is a stable amino acid.' }]],
+        ['The evening before day 1', [{ n: 'Put the first shots in the fridge', where: 'At home.', keep: 'Fridge, 2–6 °C.' }]],
+      ],
+      steps: [
+        { il: 'calendar', t: 'Mark the 7 days', d: 'Count back 7 days from the event. The beet shots run on days 1–7; the glycine drink on the last 3 nights.', c: ['7 days'] },
+        { il: 'shots', t: 'Each morning: 140 ml of beetroot', d: 'Drink two 70 ml shots, on an empty stomach, every morning of the week.', c: ['140 ml', '7 mornings'], tip: 'Skip antiseptic mouthwash this week: the mouth bacteria that turn nitrate into nitric oxide need to survive.' },
+        { il: 'moon', t: 'The last 3 nights: glycine', d: 'Stir 3 g of glycine into water or warm milk and drink it shortly before bed.', c: ['3 g', '3 nights'] },
+        { il: 'finish', t: 'Stop after the event', d: 'Stop both the morning after. This is a short loading period, not a routine.' },
+      ],
+      catch_: 'This is the weakest recipe here. The beetroot effect was small (reaction time held up a little better during fatigue, accuracy unchanged), and the glycine result comes from one small, maker-funded trial in people kept on short sleep. It will not turn a rushed week into a rested one.',
+      safety: 'Skip the beet shots if you take blood-pressure medicine, sildenafil or tadalafil, or nitrate heart medicine, or if you have had oxalate kidney stones. This nitrate dose is above EFSA’s acceptable daily intake, which is set for lifelong daily use: one reason this is 7 days, not a habit. Not for children. Pink urine or stools afterwards are harmless.' },
+    { id: 'bowl', name: 'Morning MIND Bowl', tf: 'chronic', hero: 'topbowl', time: '5 min the night before', yields: '1 bowl', when: 'Breakfast, most days',
+      what: 'Whole-grain oats, yogurt, berries and nuts: four Mediterranean and MIND building blocks in one bowl.',
+      ev: [['nuts-walnuts-almonds', 'B', 'chronic'], ['blueberry-anthocyanins', 'B', 'chronic'], ['yogurt-and-fermented-dairy', 'C', 'chronic'], ['whole-grains', 'C', 'chronic']],
+      ing: [['40 g', 'rolled oats, whole grain', 'whole-grains'], ['150 g', 'plain yogurt or lben, unsweetened', 'yogurt-and-fermented-dairy'], ['150 g', 'berries (about a cup), fresh in season or frozen', 'blueberry-anthocyanins'], ['30 g', 'walnuts or almonds (a handful)', 'nuts-walnuts-almonds'], ['a splash', 'milk (optional)']],
+      tools: ['A jar with a lid', 'A small pan (for frozen berries)', 'A knife and board'],
+      buy: [
+        ['Once a month', [
+          { n: 'Rolled oats', id: 'whole-grains', where: 'Any grocer. Coeliac? Buy certified gluten-free oats.', keep: 'Dry and closed.' },
+          { n: 'Walnuts or almonds, small packs', id: 'nuts-walnuts-almonds', where: 'Any grocer or souk; unsalted.', keep: 'Walnuts go rancid fast: keep them airtight, in the fridge, away from light.' }]],
+        ['Once a week', [
+          { n: 'Plain yogurt or lben', id: 'yogurt-and-fermented-dairy', where: 'Any grocer.', keep: 'Cold chain, 2–6 °C. Check the date.' },
+          { n: 'Berries', id: 'blueberry-anthocyanins', where: 'In Morocco, blueberries run about October to June and strawberries November to March. Out of season, buy frozen.', keep: 'Fresh: fridge, a few days. Frozen: freezer.' }]],
+        ['The night before', [{ n: 'Assemble the jar', where: 'At home.', keep: 'Fridge overnight.' }]],
+      ],
+      steps: [
+        { il: 'jar', t: 'Soak the oats overnight', d: 'Mix 40 g of oats with 150 g of yogurt (and a splash of milk) in a jar. Close it and leave it in the fridge overnight.', c: ['the night before', 'fridge'] },
+        { il: 'compote', t: 'Frozen berries? Heat them first', d: 'Warm frozen berries until they bubble, unless the pack says they are safe to eat raw: frozen berries have carried viruses.', c: ['until bubbling'] },
+        { il: 'topbowl', t: 'Top it and eat', d: 'Add 150 g of berries and 30 g of roughly chopped nuts. Eat it that morning.', c: ['150 g berries', '30 g nuts'] },
+      ],
+      catch_: 'This bowl improves blood vessels and breakfast quality; it has not been shown to make you think better. The cognition trials for berries and nuts are small and mixed, and the MIND diet’s own 3-year trial found no benefit over a control diet.',
+      safety: 'Nut allergy: leave the nuts out. Coeliac: certified gluten-free oats only. Young children: no whole nuts (choking risk).' },
+    { id: 'plate', name: 'Sardine, Lentil & Greens Plate', tf: 'chronic', hero: 'plate', time: '35 min', yields: '2 plates', when: 'Lunch or dinner, twice a week',
+      what: 'Oily fish, pulses, leafy greens and olive oil, Moroccan chermoula style: the core of a Mediterranean week.',
+      ev: [['fish-and-seafood', 'C', 'chronic'], ['legumes', 'C', 'chronic'], ['leafy-greens-and-vegetables', 'C', 'chronic'], ['olive-oil-as-food', 'B', 'chronic'], ['mediterranean-diet', 'B', 'chronic']],
+      ing: [['200 g', 'fresh sardines, cleaned (about 100 g each), or 2 tins in olive oil', 'fish-and-seafood'], ['90 g', 'dry green or brown lentils (about 200 g cooked)', 'legumes'], ['2 big handfuls', 'spinach or chard', 'leafy-greens-and-vegetables'], ['3 tbsp', 'extra-virgin olive oil', 'olive-oil-as-food'], ['1 bunch', 'parsley and coriander'], ['2 cloves', 'garlic'], ['1 tsp each', 'cumin and paprika'], ['1', 'lemon']],
+      tools: ['A pot', 'A frying pan or grill pan', 'A knife and board', 'A small bowl'],
+      buy: [
+        ['Once a month', [
+          { n: 'Dry lentils', id: 'legumes', where: 'Any grocer or souk.', keep: 'Dry and closed: damp pulses can grow moulds.' },
+          { n: 'Extra-virgin olive oil', id: 'olive-oil-as-food', where: 'In dark glass or a tin. Check the harvest date.', keep: 'Below 25 °C, away from light; use within 12–18 months of milling.' },
+          { n: 'Cumin, paprika, and 2 tins of sardines as a backup', tool: true, where: 'Spice shop or grocer.', keep: 'Tins keep for years.' }]],
+        ['1–2 days before', [
+          { n: 'Spinach or chard, parsley, coriander, lemon, garlic', id: 'leafy-greens-and-vegetables', where: 'Market or souk.', keep: 'Buy close to cooking: folate and vitamin C fade in storage.' }]],
+        ['The same day', [
+          { n: 'Fresh sardines', id: 'fish-and-seafood', where: 'Fishmonger or souk, the morning you cook.', keep: 'Carry them home cold, keep them in the fridge and cook them that day: histamine builds fast in fish left warm.' }]],
+      ],
+      steps: [
+        { il: 'pot', t: 'Cook the lentils', d: 'Rinse 90 g of lentils, cover with water and simmer until tender, about 20–25 minutes. Drain.', c: ['20–25 min'] },
+        { il: 'board', t: 'Make the chermoula', d: 'Chop the herbs and garlic. Mix with the cumin, paprika, lemon juice and 2 tbsp of olive oil.' },
+        { il: 'fish', t: 'Coat and cook the sardines', d: 'Coat them with half the chermoula. Grill or pan-cook 2–3 minutes a side, until the flesh flakes.', c: ['2–3 min a side'] },
+        { il: 'greens', t: 'Wilt the greens in olive oil', d: 'Wilt them in the pan with the last tablespoon of oil for 1–2 minutes. Wilting keeps more of their nutrients than boiling, and the oil helps you absorb lutein.', c: ['1–2 min'] },
+        { il: 'plate', t: 'Plate it, with lemon', d: 'Lentils, greens and sardines, the rest of the chermoula and a squeeze of lemon: vitamin C helps you absorb the iron in the lentils.' },
+        { il: 'tea', t: 'Mint tea an hour later, not with the meal', d: 'Tea with a meal cut iron absorption by more than 85% in Moroccan women. Have it an hour after.', c: ['+1 hour'] },
+      ],
+      catch_: 'The brain evidence for each part comes mostly from long observational studies in older adults. In trials, the gains appeared when the diet came with exercise and mental and social activity. The clearest proven benefits are for the heart and blood vessels.',
+      safety: 'Fish allergy: leave the fish out. Pregnancy: sardines are a low-mercury fish; follow national advice on servings. On warfarin: keep your greens intake steady rather than cutting them. Oxalate kidney stones: limit spinach and chard on your doctor’s advice.' },
+  ];
+  const ck = { cur: 'matcha' };
+  const SHOP = store.get('bf-shop', {});
+  function ckPane(r, on) {
+    const got = SHOP[r.id] || [];
+    const evs = r.ev.map(([id, g]) => `<span class="px-chip">${monoLink(id)}${grade(g)}</span>`).join('');
+    return `<section class="ck-recipe" id="ck-${r.id}" role="tabpanel" aria-labelledby="ck-tab-${r.id}" data-ev="${esc(r.ev.map(e => e.join(':')).join(' '))}"${on ? '' : ' hidden'}>
+      <div class="ck-head"><div class="ck-head-il">${ill(r.hero, r.name)}</div>
+        <div class="ck-head-b"><h2>${esc(r.name)}</h2><p class="ck-what">${esc(r.what)}</p>
+          <div class="ck-meta">${tf(r.tf)}<span>${icon('clock')}${esc(r.time)}</span><span>${icon('users')}${esc(r.yields)}</span><span>${icon('target')}${esc(r.when)}</span></div>
+          <div class="px-ev">${evs}</div>
+          <div class="ck-actions"><button type="button" class="btn sm" data-print>${icon('file')}Print the recipe</button></div></div></div>
+      <div class="ck-grid">
+        <section class="ck-box"><h3>${icon('list')}Ingredients <small>tick what you have</small></h3>
+          <ul class="ck-ing">${r.ing.map(([q, n, id], i) => `<li><label><input type="checkbox" data-shop="${esc(r.id)}:${i}"${got.includes(i) ? ' checked' : ''}><span class="ck-q">${esc(q)}</span><span class="ck-n">${esc(n)}</span>${id && byId[id] ? catAv(byId[id], 'sm') : ''}</label></li>`).join('')}</ul>
+          <h4>Tools</h4><div class="ck-tools">${r.tools.map(t => `<span>${esc(t)}</span>`).join('')}</div></section>
+        <section class="ck-box"><h3>${icon('basket')}When to buy each thing</h3>
+          <ol class="ck-buy">${r.buy.map(([when, items], i) => `<li class="ck-stage s${Math.min(i, 2)}${i === r.buy.length - 1 ? ' last' : ''}"><span class="ck-when">${esc(when)}</span>
+            <ul>${items.map(it => `<li class="ck-item">${it.id && byId[it.id] ? catAv(byId[it.id], 'sm') : `<span class="cat-av sm tool">${icon(it.tool ? 'utensils' : 'basket')}</span>`}<div><b>${esc(it.n)}</b><span class="ck-where">${icon('pin')}${esc(it.where)}</span><span class="ck-keep">${icon('package')}${esc(it.keep)}</span></div></li>`).join('')}</ul></li>`).join('')}</ol></section>
+      </div>
+      <section class="ck-steps-sec"><h3>Step by step</h3>
+        <ol class="ck-steps">${r.steps.map((s, i) => `<li class="ck-step"><div class="ck-step-il">${ill(s.il, s.t)}<span class="ck-step-n">${i + 1}</span></div>
+          <div class="ck-step-b"><h4>${esc(s.t)}</h4><p>${esc(s.d)}</p>${(s.c || []).length ? `<div class="ck-chips">${s.c.map(c => `<span>${esc(c)}</span>`).join('')}</div>` : ''}${s.tip ? `<p class="ck-tip">${icon('sparkles')}<span>${esc(s.tip)}</span></p>` : ''}</div></li>`).join('')}</ol></section>
+      <div class="ck-notes"><div class="rc-catch">${icon('alert')}<div><strong>The catch:</strong> ${esc(r.catch_)}</div></div>
+        <div class="ck-safety">${icon('shield')}<div><strong>Who should adapt or skip it:</strong> ${esc(r.safety)}</div></div></div>
+    </section>`;
+  }
+  function viewCooking(param) {
+    if (param && KITCHEN.some(r => r.id === param)) ck.cur = param;
+    return `<div class="ck-page">
+      <header class="ck-hero"><div class="eyebrow">Brain Food kitchen</div>
+        <div class="px-hero-top"><h1>The Cooking Lab</h1>${shareBtn()}</div>
+        <p class="lead">Four recipes built only from foods with graded human evidence in this atlas, one for each part of the <a href="#protocol">Limitless Protocol</a>. Each shows what to buy and when to buy it, then every step with a picture.</p></header>
+      <div class="ck-picker" role="tablist" aria-label="Recipes">${KITCHEN.map(r => `<button type="button" role="tab" class="ck-card" id="ck-tab-${r.id}" data-ck="${r.id}" aria-controls="ck-${r.id}" aria-selected="${r.id === ck.cur}" tabindex="${r.id === ck.cur ? 0 : -1}"><span class="ck-card-il">${ill(r.hero, r.name)}</span><span class="ck-card-b"><b>${esc(r.name)}</b><span class="ck-card-m">${tf(r.tf)}<small>${icon('clock')}${esc(r.time)}</small></span></span></button>`).join('')}</div>
+      ${KITCHEN.map(r => ckPane(r, r.id === ck.cur)).join('')}
+      <div class="callout px-fine"><strong>How these recipes were chosen.</strong> Every food here has graded human evidence in this atlas, shown as the chips under each recipe. Kitchen guidance (storage, cooking times, temperatures) is ordinary food practice, not graded here. Not medical advice: if you are pregnant, take medicines or have a health condition, check with a doctor before changing your diet or taking a supplement.</div>
+    </div>`;
+  }
+  function setCk(app, id) {
+    ck.cur = id;
+    app.querySelectorAll('[data-ck]').forEach(b => { const on = b.dataset.ck === id; b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1; });
+    app.querySelectorAll('.ck-recipe').forEach(p => { p.hidden = p.id !== 'ck-' + id; });
+    CURRENT = 'cooking.' + id;
     try { history.replaceState(null, '', '#' + CURRENT); } catch (e) { /* sandboxed frame */ }
   }
 
@@ -1907,6 +2075,7 @@
       else if (view === 'search') html = viewSearch(param);
       else if (view === 'profile') html = viewProfile(param);
       else if (view === 'protocol') html = viewProtocol(param);
+      else if (view === 'cooking') html = viewCooking(param);
       else if (VIEWS[view]) html = VIEWS[view]();
       else html = `<div class="page-head"><div><h1>Page not found</h1><p class="lead">This address does not match a page. <a href="#home">Go to the start page</a> or press <kbd>/</kbd> to search.</p></div></div>`;
     } catch (e) { html = `<h1>Rendering error</h1><pre>${esc(e.stack || e)}</pre>`; console.error(e); }
@@ -1933,6 +2102,14 @@
       if (anc && anc.getBoundingClientRect) { const top = anc.getBoundingClientRect().top + window.scrollY - (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--topbar-h')) || 0) - 6; if (window.scrollY > top) window.scrollTo({ top, behavior: 'smooth' }); }
     }));
     { const tl = app.querySelector('.itabs'); if (tl && tl.addEventListener && view === 'ingredient') tl.addEventListener('keydown', e => { if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return; const bs = Array.from(tl.querySelectorAll('[data-itab]')); const i = bs.findIndex(b => b.dataset.itab === ist.tab); const nb = bs[(i + (e.key === 'ArrowRight' ? 1 : bs.length - 1)) % bs.length]; setITab(app, nb.dataset.itab); nb.focus(); }); }
+    // cooking lab: recipe picker and shopping ticks
+    app.querySelectorAll('[data-ck]').forEach(b => b.addEventListener('click', () => setCk(app, b.dataset.ck)));
+    { const pk = app.querySelector('.ck-picker'); if (pk && pk.addEventListener && view === 'cooking') pk.addEventListener('keydown', e => { if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return; const ids = KITCHEN.map(r => r.id), i = ids.indexOf(ck.cur), n = ids[(i + (e.key === 'ArrowRight' ? 1 : ids.length - 1)) % ids.length]; setCk(app, n); const b = document.getElementById('ck-tab-' + n); if (b) b.focus(); }); }
+    app.querySelectorAll('[data-shop]').forEach(cb => cb.addEventListener('change', () => {
+      const [rid, i] = cb.dataset.shop.split(':'), list = (SHOP[rid] || []).filter(x => x !== +i);
+      if (cb.checked) list.push(+i);
+      SHOP[rid] = list; store.set('bf-shop', SHOP);
+    }));
     // evidence map: a cell opens its finding in the Evidence tab
     app.querySelectorAll('[data-emrow]').forEach(b => b.addEventListener('click', () => {
       setITab(app, 'evidence');
@@ -2084,6 +2261,7 @@
     if (t.closest('[data-traygo]')) { if (TRAY.length > 1) go('compare.' + TRAY.join(',')); return; }
     if (t.closest('[data-trayclear]')) { TRAY.length = 0; store.set('bf-compare', TRAY); syncTray(); return; }
     if (t.closest('[data-share]')) { e.preventDefault(); sharePage(); return; }
+    if (t.closest('[data-print]')) { e.preventDefault(); window.print(); return; }
     const th = t.closest('[data-theme-set]');
     if (th) { const v = th.dataset.themeSet; try { localStorage.setItem('bf-theme', v); } catch (err) { /* storage blocked */ } applyTheme(v); renderNav(); return; }
     if (t.closest('.skip-link')) { e.preventDefault(); const m = document.getElementById('app'); if (m && m.focus) m.focus(); return; }
