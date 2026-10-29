@@ -34,7 +34,9 @@
   const pmcLink = s => s && s.pmcid ? `<a href="https://pmc.ncbi.nlm.nih.gov/articles/${esc(s.pmcid)}/" target="_blank" rel="noopener">${esc(s.pmcid)}</a>` : '';
   const verifBadge = s => { const v = (s.verification && s.verification.status) || (s.verified_by_agent ? 'agent_verified' : 'unverified'); const cls = v === 'verified' ? 'pass' : v === 'agent_verified' ? 'conditional' : 'fail'; const t = v === 'verified' ? 'Record confirmed against PubMed/Crossref' : v === 'agent_verified' ? 'Verified by the research agent; independent batch check pending' : v === 'title_mismatch' ? 'Identifier found but title does not match: treat as unverified' : 'Not verified: excluded from quantitative synthesis'; return `<span class="badge ${cls}" title="${esc(t)}">${esc(v.replace('_', ' '))}</span>`; };
   const sortGrade = g => GR[g] || 0;
-  const monoLink = id => byId[id] ? `<a href="#ingredient.${esc(id)}">${esc(byId[id].name)}</a>` : `<span class="muted">${esc(id)}</span>`;
+  // group monographs later split into one file per plant (2026-10-29): old links open a page that points to the new ones
+  const RETIRED = { 'sage-rosemary-lemon-balm': { n: 'Sage, rosemary, lemon balm and peppermint', to: ['sage', 'rosemary', 'lemon-balm', 'mint'] } };
+  const monoLink = id => byId[id] ? `<a href="#ingredient.${esc(id)}">${esc(byId[id].name)}</a>` : RETIRED[id] ? `<a href="#ingredient.${esc(id)}">${esc(RETIRED[id].n)}</a>` : `<span class="muted">${esc(id)}</span>`;
   const escRe = s => String(s).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
   const GRADE_WORD = { A: 'Strong', B: 'Moderate', C: 'Limited', D: 'Preliminary', E: 'Not supported' };
   const GRADE_HELP = { A: 'consistent results from good human trials or meta-analyses.', B: 'good human trials, with some gaps or inconsistency.', C: 'few, small or mixed human studies.', D: 'mostly early, animal or mechanistic data.', E: 'the evidence points to no benefit, or to a concern.' };
@@ -151,6 +153,7 @@
       ['compare', 'Compare ingredients', 'Up to four side by side: grades, safety, limits and allowed claims.', 'columns'],
       ['acute', 'Same-day effects', 'What helps within minutes to hours: alertness, attention, reaction time.', 'zap'],
       ['longterm', 'Long-term effects', 'What changes over weeks to years: memory, ageing and decline.', 'hourglass'],
+      ['plants', 'Plants for the brain', 'Which plants help focus, calm, sleep or memory, how they were taken, and which to avoid.', 'sprout'],
       ['populations', 'Who it works for', 'Students, workers, older adults, the sleep-deprived and the deficient.', 'users'],
       ['combinations', 'Combinations', 'Which pairings beat their single ingredients, and which do not.', 'layers'],
       ['rankings', 'Rankings', 'Nine rankings for nine questions, from best-supported to weakest claims.', 'trophy'],
@@ -480,6 +483,7 @@
     ['long', 'Helps long-term', m => sortGrade(m._derived.best_grade_chronic) >= GR.C],
     ['sleep', 'Under sleep loss', m => sortGrade(m._derived.best_grade_sleep_stress) >= GR.C],
     ['clear', 'No conditions', m => m._derived.eligibility === 'eligible'],
+    ['plants', 'Plants', m => PLANT_MONOS.has(m.id)],
   ];
   const eligGate = m => m._derived.eligibility === 'eligible' ? 'pass' : m._derived.eligibility === 'ineligible' ? 'fail' : 'conditional';
   function viewDatabase() {
@@ -1177,6 +1181,309 @@
     try { history.replaceState(null, '', '#' + CURRENT); } catch (e) { /* sandboxed frame */ }
   }
 
+  // ---------- Plants for the brain: one botanical drawing per plant (same light "photo" tile as the Cooking Lab) ----------
+  const f1 = n => Math.round(n * 10) / 10;
+  const lfD = (L, W) => `M0 0C${f1(L * .28)} ${f1(-W * 1.2)} ${f1(L * .72)} ${f1(-W)} ${L} 0C${f1(L * .72)} ${W} ${f1(L * .28)} ${f1(W * 1.2)} 0 0Z`;
+  const lv = (x, y, rot, L, W, c, vein) => `<g transform="translate(${f1(x)} ${f1(y)}) rotate(${f1(rot)})"><path class="lf${c ? ' ' + c : ''}" d="${lfD(L, W)}"/>${vein === false ? '' : `<path class="vein" d="M2 0H${f1(L * .8)}"/>`}</g>`;
+  // opposite leaf pairs along a vertical stem, shrinking toward the tip
+  const opp = (x, y0, y1, n, L, W, ang, c, vein) => Array.from({ length: n }, (_, i) => { const t = n > 1 ? i / (n - 1) : 0, y = y0 + (y1 - y0) * t, k = 1 - t * .45; return lv(x, y, -ang, L * k, W * k, c, vein) + lv(x, y, 180 + ang, L * k, W * k, c, vein); }).join('');
+  // alternate leaves (one per node, switching sides)
+  const alt = (x, y0, y1, n, L, W, ang, c, vein) => Array.from({ length: n }, (_, i) => { const t = n > 1 ? i / (n - 1) : 0, y = y0 + (y1 - y0) * t, k = 1 - t * .35; return lv(x, y, i % 2 ? 180 + ang : -ang, L * k, W * k, c, vein); }).join('');
+  const ptl = (cx, cy, n, L, W, c, r0) => Array.from({ length: n }, (_, i) => `<path class="${c}" transform="translate(${cx} ${cy}) rotate(${f1((r0 || 0) + i * 360 / n)})" d="${lfD(L, W)}"/>`).join('');
+  const cc = (x, y, r, c) => `<circle class="${c}" cx="${f1(x)}" cy="${f1(y)}" r="${r}"/>`;
+  const st = (d, c) => `<path class="stm${c ? ' ' + c : ''}" d="${d}"/>`;
+  const GND = '<ellipse class="shadow" cx="60" cy="111" rx="38" ry="3.5"/>';
+  const SOIL = '<path class="soil" d="M10 74h100v30a8 8 0 0 1-8 8H18a8 8 0 0 1-8-8Z"/><path class="k nf" d="M10 74h100"/>';
+  const daisy = (x, y, r) => ptl(x, y, 13, r, r * .3, 'pw') + cc(x, y, r * .42, 'cen');
+  const spike = (x, y0, y1, c) => { let s = ''; for (let y = y0, i = 0; y > y1; y -= 3.6, i++) { const k = 1 - (y0 - y) / (y0 - y1) * .5; s += `<ellipse class="${c}" cx="${f1(x - 2.4 * k)}" cy="${f1(y)}" rx="${f1(2.4 * k)}" ry="${f1(1.7 * k)}"/><ellipse class="${c}" cx="${f1(x + 2.4 * k)}" cy="${f1(y - 1.6)}" rx="${f1(2.4 * k)}" ry="${f1(1.7 * k)}"/>`; } return s; };
+  const needles = (x, y0, y1, L, c) => { let s = ''; for (let y = y0, i = 0; y > y1; y -= 4.2, i++) { const k = 1 - (y0 - y) / (y0 - y1) * .45, d = i % 2 ? 1 : -1; s += `<path class="ndl${c ? ' ' + c : ''}" d="M${x} ${f1(y)}l${f1(d * L * k)} ${f1(-L * k * .55)}"/>`; } return s; };
+  const heart = (x, y, rot, s, c) => `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${s})"><path class="lf${c ? ' ' + c : ''}" d="M0 0C-13-3-17-20-8-27-4-30 0-27 0-24 0-27 4-30 8-27 17-20 13-3 0 0Z"/><path class="vein" d="M0-2V-22"/></g>`;
+  const fan = (x, y, rot, s) => `<g transform="translate(${x} ${y}) rotate(${rot}) scale(${s})"><path class="lf gk" d="M0 0-15-19Q-9-28-1-25L0-20 1-25Q9-28 15-19Z"/><path class="vein" d="M0 0-9-22M0 0-4-23M0 0 4-23M0 0 9-22"/></g>`;
+  const berryC = (x, y, c, pts) => pts.map(([dx, dy, r]) => cc(x + dx, y + dy, r || 3.2, 'k ' + c)).join('');
+  const rhiz = (x, y, c) => `<path class="k ${c}" d="M${x - 26} ${y}c0-6 6-9 12-7 2-5 9-6 12-1 4-4 11-3 13 2 6-1 10 4 8 9-2 5-8 6-12 4-4 4-11 4-14 0-5 3-12 2-14-3-5 1-6-2-5-4Z"/>`;
+  const PIL = {
+    mint: GND + st('M60 110V30') + opp(60, 98, 40, 5, 24, 9.5, 28) + lv(60, 33, -90, 11, 4.5) + lv(60, 34, -58, 9, 4) + lv(60, 34, -122, 9, 4) + st('M44 110Q42 90 38 72') + opp(39.5, 96, 74, 3, 15, 6, 30),
+    'lemon-balm': GND + st('M60 110V32') + opp(60, 96, 42, 4, 22, 12.5, 20, 'l2') + lv(60, 36, -90, 10, 5, 'l2') + lv(60, 37, -55, 9, 5, 'l2') + lv(60, 37, -125, 9, 5, 'l2') + [56, 74].map(y => cc(64, y - 4, 1.8, 'k pw') + cc(56, y - 4, 1.8, 'k pw')).join(''),
+    sage: GND + st('M60 110V30') + opp(60, 98, 42, 4, 30, 8.5, 42, 'sg') + spike(60, 40, 18, 'k pl'),
+    rosemary: GND + st('M60 110V18', 'w') + needles(60, 104, 22, 15) + st('M60 84Q74 74 80 56', 'w') + needles(80, 64, 44, 10) + cc(66, 40, 2.2, 'k pb') + cc(55, 50, 2.2, 'k pb') + cc(64, 30, 2, 'k pb'),
+    lavender: GND + [[44, -8], [60, 0], [76, 8]].map(([x, b]) => st(`M60 110Q${x} 80 ${x + b} 38`) + spike(x + b, 46, 16, 'k pl')).join('') + lv(58, 104, -130, 22, 2.6, 'sg', false) + lv(62, 104, -50, 22, 2.6, 'sg', false) + lv(60, 106, -100, 18, 2.4, 'sg', false) + lv(60, 106, -80, 18, 2.4, 'sg', false),
+    saffron: GND + '<path class="grass" d="M55 110Q44 80 30 56M65 110Q78 82 92 60M58 110Q54 84 46 48"/>' + st('M60 110V72') +
+      `<g transform="translate(60 76)"><path class="k pp2" transform="rotate(-118)" d="${lfD(30, 9)}"/><path class="k pp2" transform="rotate(-62)" d="${lfD(30, 9)}"/><path class="k pp" transform="rotate(-104)" d="${lfD(32, 9.5)}"/><path class="k pp" transform="rotate(-76)" d="${lfD(32, 9.5)}"/><path class="k pp" transform="rotate(-90)" d="${lfD(34, 9.5)}"/></g>` +
+      '<path class="stg" d="M60 66q-6-14-15-21M60 66q0-17 3-27M60 66q8-13 17-17"/><path class="sta" d="M57 64l-3-9M63 64l3-9"/>',
+    chamomile: GND + st('M60 110Q58 80 46 52') + st('M60 110Q64 78 78 46') + st('M60 110V64') + '<path class="fern" d="M52 92l-8-4M52 92l-6 3M66 86l8-5M66 86l7 3M60 98l-7-5M60 98l7-5M56 76l-7-2M68 70l7-1"/>' + daisy(46, 52, 12) + daisy(78, 46, 11) + daisy(60, 64, 9),
+    valerian: GND + st('M60 110V40') + [92, 76].map((y, i) => st(`M60 ${y}l${i ? 18 : -20} -8`) + st(`M60 ${y}l${i ? -18 : 20} -6`) + lv(60 + (i ? 18 : -20), y - 8, i ? -20 : 200, 12, 4) + lv(60 + (i ? -18 : 20), y - 6, i ? 200 : -20, 11, 4) + lv(60 + (i ? 9 : -10), y - 4, i ? -70 : 250, 9, 3.5) + lv(60 + (i ? -9 : 10), y - 3, i ? 250 : -70, 9, 3.5)).join('') +
+      st('M60 42l-16-10M60 42l16-10M60 42V26') + [[44, 30], [76, 30], [60, 22]].map(([x, y]) => [[0, 0], [-4, 2], [4, 2], [-2, -3], [3, -3], [-6, -1], [6, -1], [0, 4]].map(([dx, dy]) => cc(x + dx, y + dy, 2.2, 'k pk')).join('')).join(''),
+    passionflower: GND + st('M22 110Q30 70 60 58') + heart(32, 86, -40, .8) + '<path class="tendril" d="M40 74c-8-2-10-10-4-12s7 5 2 6"/>' + ptl(64, 52, 10, 26, 6.5, 'k pw', 9) + Array.from({ length: 36 }, (_, i) => { const a = i * 10 * Math.PI / 180; return `<path class="cor" d="M${f1(64 + Math.cos(a) * 7)} ${f1(52 + Math.sin(a) * 7)}L${f1(64 + Math.cos(a) * 18)} ${f1(52 + Math.sin(a) * 18)}"/>`; }).join('') + cc(64, 52, 6, 'k lf') + '<path class="sta2" d="M64 52l-6-7M64 52l6-7M64 52v-9"/>' + cc(58, 45, 1.8, 'k cen') + cc(70, 45, 1.8, 'k cen') + cc(64, 43, 1.8, 'k cen'),
+    hops: GND + st('M60 110Q50 70 66 50Q80 30 70 14') + lv(56, 80, 200, 16, 7) + lv(56, 80, 160, 16, 7) + lv(56, 80, 230, 14, 6) + [[72, 58, 1], [52, 50, .85], [76, 30, .8]].map(([x, y, s]) => `<g transform="translate(${x} ${y}) scale(${s})">${[[0, -8], [-4, -3], [4, -3], [-4, 3], [4, 3], [0, 8], [0, 0]].map(([dx, dy]) => `<path class="k hop" d="M${dx - 5} ${dy - 2}q5 9 10 0q-5-5-10 0Z"/>`).join('')}</g>`).join(''),
+    kava: GND + SOIL + '<path class="k root" d="M44 74c-2 10 2 20 10 26M54 74c0 12 6 22 14 26M64 74c4 10 12 18 22 22M50 74c-6 6-12 14-16 22"/><path class="k root" d="M44 70h30l-2 8H46Z"/>' + st('M58 74V20') + '<path class="node" d="M54 58h8M54 40h8"/>' + heart(58, 58, -60, 1) + heart(58, 40, 55, .9) + heart(58, 22, -10, .8),
+    ginkgo: GND + st('M60 110Q58 70 66 30', 'w') + st('M62 80Q46 70 36 66', 'w') + fan(66, 30, 0, 1) + fan(64, 48, 40, .95) + fan(61, 64, -40, .95) + fan(37, 66, -30, .85) + fan(48, 72, 30, .8) + fan(63, 90, 50, .8),
+    bacopa: '<ellipse class="water" cx="60" cy="102" rx="48" ry="9"/>' + st('M14 98Q40 88 60 90T106 80') + st('M40 92Q44 70 52 56') + opp(42.5, 86, 60, 3, 9, 5.5, 35, 'fl', false) + [[30, 93], [52, 90], [72, 88], [92, 83]].map(([x, y]) => lv(x, y, -60, 8, 5, 'fl', false) + lv(x, y, -120, 8, 5, 'fl', false)).join('') + [[52, 54], [76, 76]].map(([x, y]) => ptl(x, y, 5, 6, 3, 'k pw') + cc(x, y, 1.5, 'cen')).join(''),
+    ginseng: SOIL + '<path class="k root" d="M54 74c-4 8-6 16-4 24 1 5-6 8-9 10M58 74c2 10 2 18 6 24 2 4 8 6 12 6M56 90c-6 2-10 1-14-2"/><path class="k root" d="M50 74h12c0 6-1 12-6 16-4-4-6-10-6-16Z"/>' + st('M56 74V40') + [[-150, 34], [-30, 34], [-90, 26]].map(([a, _]) => { const x = 56 + Math.cos(a * Math.PI / 180) * 20, y = 46 + Math.sin(a * Math.PI / 180) * 18; return st(`M56 46L${f1(x)} ${f1(y)}`) + [-50, -25, 0, 25, 50].map(o => lv(x, y, a + o, o ? 12 : 15, 4.2)).join(''); }).join('') + berryC(56, 34, 'rd', [[0, 0, 3], [-4, 2, 2.8], [4, 2, 2.8], [-2, -4, 2.6], [2, -4, 2.6]]),
+    rhodiola: SOIL + '<path class="k rhz" d="M36 76c-4 8 2 16 12 14 6 6 18 6 24 0 10 2 16-6 12-14Z"/><path class="fine" d="M44 82c4 2 8 2 12 0M62 84c4 1 8 0 10-2"/>' + [[44, -8], [60, 0], [76, 8]].map(([x, b]) => st(`M${x} 76Q${x + b / 2} 54 ${x + b} 36`) + alt(x + b * .4, 70, 46, 4, 10, 4, 40, 'bg', false) + [[0, 0], [-4, 2], [4, 2], [-2, -3], [3, -3]].map(([dx, dy]) => cc(x + b + dx, 34 + dy, 2.4, 'k py')).join('')).join(''),
+    ashwagandha: SOIL + '<path class="k root" d="M56 74c-2 10-4 20-2 30M60 74c2 8 6 16 12 22M54 82c-6 4-10 10-12 16"/>' + st('M58 74V24', 'w') + alt(58, 66, 30, 5, 18, 8, 32, 'sg') + [[44, 48], [72, 40], [46, 30]].map(([x, y]) => `<path class="k husk" d="M${x} ${y - 9}c-6 3-7 11-1 15 3 2 7 2 9 0 5-4 3-12-2-15Z"/>` + cc(x + 1.6, y + 1, 3.2, 'k og')).join(''),
+    turmeric: GND + '<path class="lf" d="M62 92C52 70 50 40 62 14 74 40 72 70 62 92Z"/><path class="vein" d="M62 90V20"/>' + st('M62 96V84') + rhiz(60, 100, 'root') + '<ellipse class="k rzo" cx="88" cy="100" rx="9" ry="6"/><ellipse class="rzi" cx="88" cy="100" rx="5.5" ry="3.4"/>',
+    ginger: GND + '<path class="lf" d="M58 92C50 70 50 42 58 18 66 42 66 70 58 92Z"/><path class="vein" d="M58 90V24"/>' + rhiz(60, 100, 'root') + '<ellipse class="k root" cx="90" cy="100" rx="8" ry="5.5"/><ellipse class="gi" cx="90" cy="100" rx="5" ry="3.2"/>',
+    'gotu-kola': GND + [[40, 60, -110], [60, 46, -90], [80, 58, -70], [50, 78, -130], [72, 78, -50]].map(([x, y]) => st(`M60 108Q${f1((x + 60) / 2)} ${f1((y + 108) / 2 + 6)} ${x} ${y + 8}`) + `<path class="lf" d="M${x} ${y + 8}c-11 0-14-14-6-19 3-2 6-1 6 2 0-3 3-4 6-2 8 5 5 19-6 19Z"/><path class="vein" d="M${x} ${y + 6}v-12M${x} ${y + 6}l-6-8M${x} ${y + 6}l6-8"/>`).join(''),
+    'holy-basil': GND + st('M60 110V30') + opp(60, 96, 50, 4, 20, 9, 30, 'pu') + st('M60 50l-14-14M60 50l14-14') + spike(60, 44, 20, 'k lil') + spike(46, 38, 22, 'k lil') + spike(74, 38, 22, 'k lil'),
+    tea: GND + st('M60 110Q58 70 62 26', 'w') + [[96, -30, 26, 11], [96, 210, 26, 11], [74, -40, 22, 10], [74, 220, 22, 10], [54, -50, 18, 8], [54, 230, 17, 8]].map(([y, r, L, W]) => lv(60, y, r, L, W, 'dk')).join('') + lv(62, 30, -75, 12, 4, 'l2') + lv(62, 34, -110, 10, 4, 'l2') + `<path class="k l2" d="M62 28c-3-6-1-12 1-16 3 4 3 10-1 16Z"/>`,
+    coffee: GND + st('M60 110Q60 70 60 22', 'w') + [[96, 30, 26, 10], [70, 30, 23, 9], [46, 34, 19, 8]].map(([y, a, L, W]) => lv(60, y, -a, L, W, 'dk') + lv(60, y, 180 + a, L, W, 'dk') + berryC(60, y + 4, 'rd', [[-5, 0], [5, 0], [0, 3], [-2, -3], [3, -3]])).join(''),
+    cocoa: GND + '<path class="k bk" d="M20 110V14h14v96Z"/>' + st('M34 40Q50 40 56 48') + `<path class="k coc" d="M56 48c12 0 22 18 18 38-2 12-10 18-18 18s-16-6-18-18c-4-20 6-38 18-38Z"/><path class="fine" d="M56 50v54M48 54c-4 14-4 34 2 48M64 54c4 14 4 34-2 48"/>` + lv(34, 30, -30, 34, 9, 'dk') + lv(34, 60, 20, 26, 8, 'dk'),
+    guarana: GND + st('M24 110Q40 60 70 40', 'w') + lv(46, 74, -150, 22, 7, 'dk') + lv(56, 54, -20, 22, 7, 'dk') + [[66, 40], [80, 46], [70, 54], [86, 34], [74, 28]].map(([x, y]) => cc(x, y, 6.5, 'k gu') + `<ellipse class="k wh" cx="${x}" cy="${y + 1}" rx="4.3" ry="4.6"/>` + cc(x, y + 1.6, 2.6, 'sd')).join(''),
+    olive: GND + st('M22 30Q60 50 100 96', 'w') + [[34, 37], [48, 45], [62, 55], [76, 66], [88, 80]].map(([x, y], i) => lv(x, y, i % 2 ? 20 : -60, 20, 3.8, 'ol') + lv(x, y, i % 2 ? 110 : 160, 18, 3.6, 'ol')).join('') + [[54, 58], [70, 68], [82, 86]].map(([x, y], i) => `<ellipse class="k ${i === 1 ? 'olg' : 'oliv'}" cx="${x}" cy="${y + 6}" rx="5" ry="7"/>`).join(''),
+    blueberry: GND + st('M60 110Q58 80 60 50') + lv(60, 60, -40, 22, 8) + lv(60, 66, 210, 22, 8) + berryC(60, 46, 'bb', [[-9, 0, 7.5], [8, -2, 7.5], [-1, -12, 7], [0, 9, 7.5], [13, 10, 6.5], [-13, 12, 6.5]]) + [[-9, 0], [8, -2], [-1, -12], [0, 9]].map(([dx, dy]) => `<path class="crown" d="M${57 + dx} ${46 + dy}l3-1.5 3 1.5M${60 + dx} ${44.5 + dy}v3"/>`).join(''),
+    beetroot: GND + `<path class="k bt" d="M60 104c-4 0-6 4-6 6M60 100c14 0 22-10 22-22S74 58 60 58 38 66 38 78s8 22 22 22Z"/><path class="fine" d="M48 74c6 4 18 4 24 0"/>` + ['M54 60Q44 40 30 30', 'M60 58Q60 36 58 16', 'M66 60Q78 40 92 32'].map(d => `<path class="rstm" d="${d}"/>`).join('') + lv(30, 30, -150, 22, 9) + lv(58, 18, -110, 22, 9) + lv(92, 32, -30, 22, 9),
+    orange: GND + cc(48, 74, 26, 'k og') + '<path class="fine" d="M40 58c-4 3-6 7-6 11"/>' + st('M48 48V40') + lv(48, 42, -30, 20, 7) + `<path class="k og" d="M66 100a24 24 0 0 1 48 0Z"/><path class="ogi" d="M70 100a20 20 0 0 1 40 0Z"/><path class="seg" d="M90 100l-14-13M90 100l-4-19M90 100l6-19M90 100l15-12"/>`,
+    pomegranate: GND + `<path class="k pm" d="M44 52l-3-9 6 4 3-8 3 8 6-4-3 9c14 4 20 16 18 30-2 16-14 26-28 26S18 98 16 82c-2-14 6-26 20-30Z" transform="translate(4 0)"/>` + `<path class="k pm" d="M72 104a22 22 0 0 1 44 0Z" transform="translate(-6 0)"/><path class="pmi" d="M70 104a18 18 0 0 1 36 0Z"/>` + [[76, 96], [82, 92], [88, 90], [94, 92], [100, 96], [80, 100], [86, 97], [92, 97], [98, 100], [88, 102]].map(([x, y]) => cc(x, y, 2.4, 'aril')).join(''),
+    nigella: GND + st('M60 110V56') + '<path class="fern" d="M60 96l-10-6M60 96l10-6M60 84l-9-5M60 84l9-5M60 70l-8-4M60 70l8-4"/>' + ptl(60, 44, 5, 18, 8, 'k pb2', -90) + '<path class="fern" d="M60 44l-20-10M60 44l20-10M60 44l-18 12M60 44l18 12M60 44V22"/>' + cc(60, 44, 4, 'k lf') + Array.from({ length: 8 }, (_, i) => { const a = i * 45 * Math.PI / 180; return `<path class="sta" d="M60 44L${f1(60 + Math.cos(a) * 8)} ${f1(44 + Math.sin(a) * 8)}"/>`; }).join('') + `<path class="k pod" d="M88 74c-7 0-10 8-8 18 1 6 5 10 8 10s7-4 8-10c2-10-1-18-8-18Z"/><path class="fine" d="M88 74v28M84 76c-2 8-2 18 1 25M92 76c2 8 2 18-1 25"/>` + [[24, 104], [30, 106], [36, 103], [28, 101], [34, 108], [40, 106]].map(([x, y]) => `<path class="sd" d="M${x} ${y}l2.4-2 1.4 3-2.6 1.6Z"/>`).join(''),
+    'lemon-verbena': GND + st('M60 110V20') + [92, 72, 52, 36].map((y, i) => { const k = 1 - i * .15; return lv(60, y, -30, 24 * k, 4.5 * k, 'l2') + lv(60, y, 210, 24 * k, 4.5 * k, 'l2') + lv(60, y, i % 2 ? -100 : -80, 18 * k, 4 * k, 'l2'); }).join('') + [[-4, 22], [4, 20], [0, 16], [-3, 28], [3, 26]].map(([dx, y]) => cc(60 + dx, y, 1.7, 'k lil')).join(''),
+    thyme: GND + ['M60 110Q48 80 36 58', 'M60 110Q60 78 60 46', 'M60 110Q74 80 86 60'].map(d => st(d, 'w')).join('') + [[40, 66], [44, 76], [48, 88], [60, 56], [60, 70], [60, 84], [82, 68], [78, 78], [72, 90], [52, 98], [68, 98]].map(([x, y], i) => `<ellipse class="k sg" cx="${x + (i % 2 ? 4 : -4)}" cy="${y}" rx="3.4" ry="1.8" transform="rotate(${i % 2 ? 30 : -30} ${x + (i % 2 ? 4 : -4)} ${y})"/>`).join('') + [[36, 56], [60, 44], [86, 58]].map(([x, y]) => [[0, 0], [-3, 2], [3, 2], [0, -3]].map(([dx, dy]) => cc(x + dx, y + dy, 2, 'k pk')).join('')).join(''),
+    wormwood: GND + st('M60 110V22') + [[94, 1], [80, -1], [66, 1], [52, -1], [40, 1]].map(([y, s], i) => { const k = 1 - i * .12; return [0, 1, 2].map(j => lv(60, y - j * 2, s > 0 ? -20 - j * 22 : 200 + j * 22, 16 * k, 2.6, 'sv', false)).join(''); }).join('') + [[56, 28], [64, 26], [60, 22], [55, 34], [65, 33]].map(([x, y]) => cc(x, y, 2, 'k py')).join(''),
+    pennyroyal: GND + st('M14 104Q40 96 60 98T106 92') + st('M60 98V32') + [[30, 100], [86, 96]].map(([x, y]) => lv(x, y, -60, 8, 4, '', false) + lv(x, y, -120, 8, 4, '', false)).join('') + [82, 62, 42].map(y => lv(60, y + 6, -20, 10, 4.4) + lv(60, y + 6, 200, 10, 4.4) + [-8, -4, 0, 4, 8].map(dx => cc(60 + dx, y, 2.4, 'k lil')).join('') + [-6, -2, 2, 6].map(dx => cc(60 + dx, y - 3.5, 2.2, 'k lil')).join('')).join(''),
+    harmal: GND + st('M60 110Q50 80 40 50') + st('M60 110Q70 80 82 52') + st('M60 110V44') + needles(60, 100, 50, 10) + needles(70, 86, 56, 8) + [[40, 48], [60, 42]].map(([x, y]) => ptl(x, y, 5, 9, 4, 'k pw', -90) + cc(x, y, 2, 'cen')).join('') + `<path class="k pod2" d="M82 46a7 7 0 1 0 0.1 0Z"/><path class="fine" d="M82 46v14M76 50l12 6"/>` + [[22, 106], [27, 104], [31, 107]].map(([x, y]) => cc(x, y, 1.6, 'sd')).join(''),
+    'pine-bark': GND + '<path class="k bk" d="M14 110V8h52v102Z"/>' + [[16, 12, 22, 18], [40, 14, 22, 20], [18, 34, 20, 22], [40, 38, 22, 18], [16, 60, 24, 20], [42, 60, 20, 24], [18, 84, 22, 20], [42, 88, 20, 20]].map(([x, y, w, h]) => `<path class="k bkl" d="M${x} ${y + 3}l${w * .4} -3 ${w * .6} 4 -2 ${h - 4} -${w * .6} 2 -${w * .4 - 2} -3Z"/>`).join('') + `<g transform="translate(90 80)">${[[0, -16, 7], [-5, -8, 7.5], [5, -8, 7.5], [-6, 0, 8], [6, 0, 8], [-4, 8, 7], [4, 8, 7], [0, 15, 6]].map(([x, y, w]) => `<path class="k cone" d="M${x - w / 2} ${y}q${w / 2} -7 ${w} 0q-${w / 2} 5 -${w} 0Z"/>`).join('')}</g>` + st('M90 64V50', 'w') + needles(90, 50, 34, 12, 'pn'),
+    sceletium: GND + [[-60, 30, 13], [-120, 30, 13], [-30, 22, 11], [-150, 22, 11], [-90, 16, 9]].map(([a, L, W]) => `<path class="k bg" transform="translate(60 100) rotate(${a})" d="M0 0C${L * .3} -${W * .5} ${L * .8} -${W * .5} ${L} 0C${L * .8} ${W * .5} ${L * .3} ${W * .5} 0 0Z"/>`).join('') + st('M60 96V60') + ptl(60, 52, 22, 15, 2, 'k ps') + cc(60, 52, 4, 'k cen'),
+    thistle: GND + [-172, -138, -100, -80, -42, -8].map(a => lv(60, 102, a, 28, 6, 'sg')).join('') + [-150, -30].map(a => lv(60, 102, a, 22, 5, 'sg')).join('') + '<path class="fern" d="M44 96l-4-5M76 96l4-5M52 90l-3-6M68 90l3-6M38 100l-6-2M82 100l6-2"/>' + st('M60 102V80') + '<path class="k lf" d="M47 80q13 14 26 0q-3-10-13-10t-13 10Z"/>' + ptl(60, 70, 18, 13, 2.2, 'k pp', -180) + cc(60, 70, 4, 'k pk'),
+    'club-moss': GND + [[44, 60], [60, 40], [76, 56]].map(([x, top]) => st(`M${x} 110V${top}`) + needles(x, 104, top + 2, 7, 'cm')).join(''),
+    periwinkle: GND + st('M10 100Q40 90 60 96T110 88') + [[24, 94, -40], [44, 92, 220], [80, 94, -30], [98, 90, 210]].map(([x, y, r]) => lv(x, y, r, 18, 7, 'dk')).join('') + [0, 72, 144, 216, 288].map(r => `<path class="k pb2" transform="translate(60 62) rotate(${r})" d="M0 0C4-6 14-12 20-6 22-2 14 2 0 0Z"/>`).join('') + cc(60, 62, 3, 'k pw') + st('M60 92V70'),
+  };
+  const pIll = (k, label) => `<svg class="ill pl-ill" viewBox="0 0 120 120" role="img" aria-label="${esc(label || k)}">${PIL[k] || ''}</svg>`;
+
+  // the plants: each card reads its grades live from its monograph (only the rows of its own studies when a monograph covers several plants)
+  // f: kitchen = eaten or drunk as food/tea; extract = only studied as a concentrated extract; ma: common in Moroccan kitchens or teas
+  const PLANTS = [
+    { id: 'coffee', n: 'Coffee', lat: 'Coffea arabica, C. canephora', part: 'Roasted seed', loc: 'qahwa (قهوة)', f: 'kitchen', ma: 1, mono: 'coffee', il: 'coffee',
+      line: 'A reliable same-day lift in reaction time and alertness, from its caffeine. No long-term benefit for thinking has been shown.',
+      dose: '80–200 mg caffeine (1–2 cups); 75–100 mg already gives most of the effect.', watch: 'Strong evidence that caffeine late in the day harms sleep. Stay under 400 mg a day, last cup by early afternoon.' },
+    { id: 'tea', n: 'Tea', lat: 'Camellia sinensis', part: 'Leaf', loc: 'atay (أتاي)', f: 'kitchen', ma: 1, mono: 'tea-and-green-tea', il: 'tea',
+      line: 'A cup lifts attention and alertness within the hour, from caffeine plus a little L-theanine. Longer-term benefits are not shown.',
+      dose: '1–3 cups, or one 2–3 g matcha serving (40–100 mg caffeine).', watch: 'Drunk with a meal it sharply cuts iron absorption. Have it an hour after eating, especially if low in iron.' },
+    { id: 'cocoa', n: 'Cocoa', lat: 'Theobroma cacao', part: 'Seed', f: 'kitchen', mono: 'cocoa-flavanols', il: 'cocoa',
+      line: 'Cocoa flavanols raise blood flow to the brain within hours. That is a blood-flow marker; effects on thinking itself are small and often absent.',
+      dose: '200–900 mg cocoa flavanols, from high-flavanol cocoa powder or capsules, not ordinary chocolate.', watch: 'Some cocoa carries cadmium and lead: buy tested products. It also contains caffeine and theobromine.' },
+    { id: 'guarana', n: 'Guarana and yerba mate', lat: 'Paullinia cupana, Ilex paraguariensis', part: 'Seed, leaf', f: 'kitchen', mono: 'yerba-mate-and-guarana', il: 'guarana',
+      line: 'Natural caffeine sources: small same-day gains in speed, and no proven effect beyond the caffeine they contain.',
+      dose: 'Guarana 37.5–500 mg (4–130 mg caffeine); mate about 2 g of leaf.', watch: 'Caffeine content is often undeclared. Mate drunk very hot or smoke-dried carries cancer-related risks: drink it below 65 °C.' },
+    { id: 'turmeric', n: 'Turmeric', lat: 'Curcuma longa', part: 'Rhizome', loc: 'kharqoum (خرقوم)', f: 'extract', ma: 1, mono: 'curcumin', il: 'turmeric',
+      line: 'Enhanced-absorption curcumin extracts gave small gains in working memory and less fatigue in healthy older adults over 4–12 weeks. Not tested in young adults.',
+      dose: '80–400 mg curcumin a day in an absorbable form. Kitchen turmeric gives far less, and is poorly absorbed.', watch: 'Rare liver injury has been reported with extracts. Ask a doctor first if you take blood thinners.' },
+    { id: 'olive', n: 'Olive (extra-virgin oil)', lat: 'Olea europaea', part: 'Fruit oil', loc: 'zit zitoun (زيت الزيتون)', f: 'kitchen', ma: 1, mono: 'olive-oil-as-food', il: 'olive',
+      line: 'As the main fat of a Mediterranean diet, linked to slower cognitive decline in older adults (limited evidence), and clearly good for blood vessels.',
+      dose: '20–50 ml a day as the cooking and salad fat.', watch: 'Fraud is common: buy dated extra-virgin oil in dark glass or tins.' },
+    { id: 'blueberry', n: 'Blueberry', lat: 'Vaccinium spp.', part: 'Fruit', f: 'kitchen', mono: 'blueberry-anthocyanins', il: 'blueberry',
+      line: 'Small, inconsistent memory signals, mostly in older or memory-complaining adults. It reliably improves a blood-vessel marker.',
+      dose: 'A cup of berries, or about 26 g freeze-dried powder (about 300 mg anthocyanins).', watch: 'No concern at food amounts. Heat frozen berries before eating them.' },
+    { id: 'beetroot', n: 'Beetroot', lat: 'Beta vulgaris', part: 'Root', loc: 'barba (باربا)', f: 'kitchen', ma: 1, mono: 'beetroot-nitrate', il: 'beetroot',
+      line: 'Lowers blood pressure, but repeated trials in healthy adults found no consistent effect on measured thinking.',
+      dose: '5–13 mmol nitrate a day: 70–300 ml juice concentrate, or 200–300 g beetroot.', watch: 'Not with blood-pressure medicine, sildenafil, tadalafil or nitrate heart drugs.' },
+    { id: 'orange', n: 'Orange', lat: 'Citrus sinensis', part: 'Fruit', loc: 'limoun (ليمون)', f: 'kitchen', ma: 1, mono: 'citrus-flavanones-hesperidin', il: 'orange',
+      line: 'Flavanone-rich orange juice gave small, mostly single-lab gains in speed and executive tasks, the same day and over 8 weeks.',
+      dose: '272–305 mg flavanones (240–500 ml of orange juice).', watch: 'Juice adds sugar: whole oranges are the better daily habit.' },
+    { id: 'pomegranate', n: 'Pomegranate', lat: 'Punica granatum', part: 'Fruit', loc: 'rommane (رمان)', f: 'kitchen', ma: 1, mono: 'other-promising-dietary-bioactives', st: ['siddarth2020', 'bookheimer2013'], il: 'pomegranate',
+      line: 'In a 12-month trial in adults aged 50–75, visual learning held steady instead of declining; other memory tests did not change.',
+      dose: '236 ml (8 oz) of juice a day.', watch: 'A daily glass of juice adds sugar.' },
+    { id: 'ginger', n: 'Ginger', lat: 'Zingiber officinale', part: 'Rhizome', loc: 'skinjbir (سكنجبير)', f: 'extract', ma: 1, mono: 'other-promising-dietary-bioactives', st: ['saenghong2012'], il: 'ginger',
+      line: 'One 2-month trial in 60 healthy middle-aged women found better working memory with ginger extract. It has not been repeated.',
+      dose: '400–800 mg ginger extract a day.', watch: 'One trial only. Extract doses are far above kitchen amounts.' },
+    { id: 'bacopa', n: 'Bacopa', lat: 'Bacopa monnieri', part: 'Whole herb', f: 'extract', mono: 'bacopa-monnieri', il: 'bacopa',
+      line: 'The best-studied memory herb: 12 weeks of standardised extract gave healthy older adults a small, inconsistent gain in word recall. Nothing on the first day.',
+      dose: '300 mg a day of standardised extract, for about 12 weeks.', watch: 'Stomach upset is common. Medication, pregnancy and thyroid warnings apply; batches need heavy-metal testing.' },
+    { id: 'ginkgo', n: 'Ginkgo', lat: 'Ginkgo biloba', part: 'Leaf', f: 'extract', mono: 'ginkgo-biloba', il: 'ginkgo',
+      line: 'Despite its fame, no benefit for memory or attention in healthy people (pooled effect about zero across 13 trials), and it did not prevent dementia in two large trials.',
+      dose: 'EGb 761 extract, 120–240 mg a day.', watch: 'Bleeding risk with blood thinners. Avoid before surgery, in epilepsy and in pregnancy.' },
+    { id: 'panax-ginseng', n: 'Asian ginseng', lat: 'Panax ginseng', part: 'Root', f: 'extract', mono: 'panax-ginseng', il: 'ginseng',
+      line: 'Single doses gave small, inconsistent gains in mental-arithmetic speed and less mental fatigue in healthy young adults, mostly from one research group.',
+      dose: '200–400 mg standardised extract (G115).', watch: 'Interacts with warfarin, and lowers blood sugar: take care with diabetes medicines.' },
+    { id: 'american-ginseng', n: 'American ginseng', lat: 'Panax quinquefolius', part: 'Root', f: 'extract', mono: 'american-ginseng-cereboost', il: 'ginseng',
+      line: 'The most consistent same-day working-memory gains of any ginseng, in healthy young and middle-aged adults, but all from one branded extract.',
+      dose: '100–400 mg of the Cereboost extract (200 mg typical).', watch: 'Safety data cover 14 days at most, with none in pregnancy or alongside medicines.' },
+    { id: 'rhodiola', n: 'Rhodiola', lat: 'Rhodiola rosea', part: 'Root', f: 'extract', mono: 'rhodiola-rosea', il: 'rhodiola',
+      line: 'Old, small trials suggest less fatigue under stress; the one rigorous trial in healthy students found it made fatigue worse.',
+      dose: '100–660 mg a day of standardised extract.', watch: 'Possible drug interactions; species substitution is widespread; no safety data beyond 6 weeks.' },
+    { id: 'ashwagandha', n: 'Ashwagandha', lat: 'Withania somnifera', part: 'Root', f: 'extract', mono: 'ashwagandha', il: 'ashwagandha',
+      line: 'Probably lowers self-reported stress in stressed adults over about 8 weeks. Evidence for sharper thinking is limited and mostly industry-funded.',
+      dose: 'Root extract, up to 600 mg a day, for 8–12 weeks.', watch: 'Rare but serious liver injury; thyroid and hormone effects; not in pregnancy.' },
+    { id: 'gotu-kola', n: 'Gotu kola', lat: 'Centella asiatica', part: 'Leaf', f: 'extract', mono: 'gotu-kola-and-other-adaptogens', st: ['puttarak2017'], il: 'gotu-kola',
+      line: 'A meta-analysis found no benefit on memory or other thinking tests; people felt a little more alert an hour after a dose.',
+      dose: 'Extract doses varied between trials.', watch: 'Isolated reports of liver injury with high-dose, long-term extracts.' },
+    { id: 'holy-basil', n: 'Holy basil (tulsi)', lat: 'Ocimum tenuiflorum (O. sanctum)', part: 'Leaf', f: 'extract', mono: 'gotu-kola-and-other-adaptogens', st: ['sampath2015holybasil'], il: 'holy-basil',
+      line: 'One small trial: faster reactions and fewer errors on memory-scanning and Stroop tasks after 30 days. It needs repeating.',
+      dose: '300 mg of leaf extract a day.', watch: 'One small trial; no long-term safety data.' },
+    { id: 'saffron', n: 'Saffron', lat: 'Crocus sativus', part: 'Stigma', loc: 'zaafrane (زعفران)', f: 'kitchen', ma: 1, mono: 'saffron', il: 'saffron',
+      line: 'Moderate evidence that it eases mild-to-moderate depression in patients over 6–12 weeks, though the effect is probably overstated; weaker, mostly industry-funded evidence for low mood and poor sleep. No trial shows sharper thinking in healthy people.',
+      dose: '28–30 mg a day of saffron stigma or standardised extract, for 4–12 weeks. A daily saffron tea can reach this; an occasional dish does not.', watch: 'Not in pregnancy (it can stimulate the womb). Possible interactions with antidepressants and blood thinners. Adulteration is common: buy authenticated saffron, such as Taliouine PDO.' },
+    { id: 'mint', n: 'Mint (spearmint, peppermint)', lat: 'Mentha spicata, Mentha × piperita', part: 'Leaf', loc: 'naanaa (نعناع)', f: 'kitchen', ma: 1, mono: 'mint', il: 'mint',
+      line: 'A safe, pleasant food with thin brain evidence: a maker-run spearmint extract gave small attention gains over 90 days, and peppermint oil or scent gave short, inconsistent lifts in alertness.',
+      dose: '900 mg a day of a spearmint extract for 90 days, or a 50–100 µl peppermint-oil capsule. A cup of mint tea is far below these amounts.', watch: 'Moroccan mint tea has never been tested for thinking: its lift comes from the green tea, with sugar and an iron-absorption cost. Peppermint oil can worsen reflux. Large daily amounts of spearmint tea have hormonal effects in women.' },
+    { id: 'lemon-balm', n: 'Lemon balm', lat: 'Melissa officinalis', part: 'Leaf', f: 'kitchen', mono: 'lemon-balm', il: 'lemon-balm',
+      line: 'A mild, short-acting calming herb. Some single doses made people calmer, others made them less alert and slower, and the largest long-term trial (96 weeks, 323 older adults) found no cognitive benefit.',
+      dose: 'Single doses of 300–1,600 mg leaf or extract; 200–400 mg of extract a day for 2–3 weeks in the stress and sleep trials.', watch: 'Can make you drowsy and slower: not before driving or an exam, and not with alcohol or sedatives. Not for children under 12.' },
+    { id: 'sage', n: 'Sage', lat: 'Salvia officinalis, S. lavandulaefolia', part: 'Leaf', loc: 'salmiya (السالمية)', f: 'kitchen', ma: 1, mono: 'sage', il: 'sage',
+      line: 'Small, mostly same-day gains in memory and mood in a handful of small trials, partly industry-funded. Limited evidence, far from a proven enhancer.',
+      dose: '300–600 mg dried leaf or 25–50 µl Spanish-sage oil as a single dose; 600 mg a day of an extract for 29 days.', watch: 'Sage tea and cooking are fine. Sage essential oil and high-thujone extracts can cause seizures: not in pregnancy, epilepsy or for children.' },
+    { id: 'lavender', n: 'Lavender', lat: 'Lavandula angustifolia', part: 'Flower oil', loc: 'khzama (خزامى)', f: 'extract', ma: 1, mono: 'lavender', il: 'lavender',
+      line: 'A standardised lavender-oil capsule moderately eased anxiety in patients over about 10 weeks, without sedation. Its scent made working memory and reactions worse in one trial.',
+      dose: 'Silexan oil capsule, 80 mg a day (a licensed medicine in Germany). A cup of lavender tea is not the same dose.', watch: 'Adults only, not in pregnancy. Moroccan khzama is mostly other species (L. dentata, L. stoechas) with no trial data. Do not diffuse it while studying.' },
+    { id: 'black-seed', n: 'Black seed', lat: 'Nigella sativa', part: 'Seed', loc: 'sanouj (سانوج), habba sawda (الحبة السوداء)', f: 'kitchen', ma: 1, mono: 'nigella-sativa', il: 'nigella',
+      line: 'Two small, unrepeated trials from one group (40 healthy older people, 48 teenage boys) found better memory after 4–9 weeks of seed powder. No trial in young adults.',
+      dose: '0.5–1 g of seed powder a day, in capsules, for 4–9 weeks.', watch: 'Can lower blood sugar and blood pressure: take care with diabetes, blood-pressure and blood-thinning medicines, kidney disease and pregnancy. The oil on skin can cause severe allergic reactions.' },
+    { id: 'pine-bark', n: 'Maritime pine bark (Pycnogenol)', lat: 'Pinus pinaster', part: 'Bark extract', f: 'extract', mono: 'pine-bark-pycnogenol', il: 'pine-bark',
+      line: 'The claims rest mostly on non-randomised studies from one Italian group, plus one small controlled trial in older adults. No credible evidence in students or young workers.',
+      dose: '100–150 mg a day of the branded extract, for about 3 months.', watch: 'Side effects are poorly reported; no data in pregnancy or for long-term use. Its 12-month trial in older adults has not published cognitive results.' },
+    { id: 'chamomile', n: 'Chamomile', lat: 'Matricaria chamomilla', part: 'Flower', loc: 'babounj (بابونج)', f: 'kitchen', ma: 1, mono: 'sleep-and-calming-herbs', st: ['kazemi2024', 'hieu2019', 'chang2016', 'mao2016'], il: 'chamomile',
+      line: 'Small, mostly self-reported gains in sleep quality across reviews of 10–12 trials; effects on anxiety are inconsistent. Its effect on thinking has not been tested.',
+      dose: 'Chamomile tea, or extract capsules up to 1,500 mg a day, for 2–4 weeks.', watch: 'Allergy, pregnancy and sedative warnings apply.' },
+    { id: 'valerian', n: 'Valerian', lat: 'Valeriana officinalis', part: 'Root', f: 'extract', mono: 'sleep-and-calming-herbs', st: ['bent2006', 'fernandezsanmartin2010', 'valente2024', 'taibi2009', 'kuhlmann1999', 'gutierrez2004', 'thomas2016', 'morin2005', 'schicktanz2025'], il: 'valerian',
+      line: 'Despite its reputation, valerian does not reliably improve measured sleep (a 2024 review of reviews found no support), and valerian-hops tablets gave only small, self-reported gains. It did not slow reactions the next morning.',
+      dose: '300–600 mg of root extract in the evening; valerian-hops tablets for 3–4 weeks.', watch: 'Adds to sedatives and alcohol. Not in pregnancy or for children.' },
+    { id: 'passionflower', n: 'Passionflower', lat: 'Passiflora incarnata', part: 'Leaf and flower', f: 'kitchen', mono: 'sleep-and-calming-herbs', st: ['ngan2011', 'lee2020', 'akhondzadeh2001'], il: 'passionflower',
+      line: 'A cup of passionflower tea a day for a week improved self-rated sleep quality in healthy 18–35-year-olds, on one of six sleep-diary measures.',
+      dose: 'One cup of tea a day for 7 days; extracts in the insomnia trial.', watch: 'Sedative, pregnancy and child warnings apply.' },
+    { id: 'hops', n: 'Hops', lat: 'Humulus lupulus', part: 'Flower cone', f: 'extract', mono: 'sleep-and-calming-herbs', st: ['kyrou2017'], il: 'hops',
+      line: 'One small crossover trial in 36 university students with mild symptoms: 4 weeks of hops extract lowered their anxiety, low-mood and stress scores more than placebo. Not repeated.',
+      dose: 'Hops dry extract, 0.4 g a day for 4 weeks.', watch: 'One small trial only. Sedative and pregnancy warnings apply.' },
+    { id: 'rosemary', n: 'Rosemary', lat: 'Salvia rosmarinus (Rosmarinus officinalis)', part: 'Leaf', loc: 'azir (أزير)', f: 'kitchen', ma: 1, mono: 'rosemary', il: 'rosemary',
+      line: 'Mixed results: its scent improved memory quality but slowed memory speed, and 750 mg of dried leaf helped older adults while 6 g impaired them. A good kitchen herb, not a proven enhancer.',
+      dose: 'Scent in the room; 750 mg of dried leaf as one dose (close to cooking amounts); 1 g a day in capsules in the student trial.', watch: 'Cooking and tea amounts are fine. Extracts: not in pregnancy, breastfeeding, under 12 or with liver disease. Never swallow the essential oil (seizure risk).' },
+    { id: 'lemon-verbena', n: 'Lemon verbena', lat: 'Aloysia citrodora', part: 'Leaf', loc: 'louiza (لويزة)', f: 'kitchen', ma: 1, mono: 'moroccan-traditional-herbs', st: ['afrasiabian2019', 'perezpinero2024', 'martinezrodriguez2022', 'haryalchi2023', 'jackson2025'], il: 'lemon-verbena',
+      line: 'Small, partly industry-run trials found better sleep with lemon verbena extract over 4 weeks to 3 months. There are no cognitive data in adults; in children it did not help thinking and increased fatigue.',
+      dose: '400 mg a day of a standardised extract, or 10 ml of syrup before bed. Ordinary louiza tea has not been tested.', watch: 'Adults only, not in pregnancy or breastfeeding. It can make you drowsy: keep it for the evening, not for study or before driving.' },
+    { id: 'thyme', n: 'Thyme', lat: 'Thymus vulgaris, Thymus satureioides', part: 'Leaf', loc: 'zaitra (زعيترة)', f: 'kitchen', ma: 1, mono: 'moroccan-traditional-herbs', st: ['alqudah2023', 'mechan2011'], il: 'thyme',
+      line: 'One trial in 106 university students: 1 g of dried thyme leaf a day for a month lowered anxiety and improved self-rated sleep and memory complaints. Memory was not measured with tests.',
+      dose: '1 g of dried leaf a day (500 mg twice), in capsules, for 1 month.', watch: 'Food amounts are safe. One trial only, with a registration mismatch. A thyme extract would need its own safety review.' },
+  ];
+  // plants to keep away from: shown with the reason, never with a recommendation. Each one fails a hard safety or legal gate
+  // in its own research file, even where that file covers other, permitted plants (so the card always shows Fail)
+  const PLANTS_AVOID = [
+    { id: 'huperzine', n: 'Huperzine A (Chinese club moss)', lat: 'Huperzia serrata', part: 'Isolated alkaloid', f: 'extract', mono: 'huperzine-a-and-vinpocetine', il: 'club-moss',
+      why: 'A drug-like enzyme blocker, the same action as dementia drugs, sold as a supplement. There are only low-quality dementia trials, and no safety data for daily use in healthy adults.' },
+    { id: 'vinpocetine', n: 'Vinpocetine (from lesser periwinkle)', lat: 'Vinca minor', part: 'Semi-synthetic alkaloid', f: 'extract', mono: 'huperzine-a-and-vinpocetine', il: 'periwinkle',
+      why: 'No proven benefit, and the US FDA warns women who are or may become pregnant not to take it; it has also tentatively ruled it is not a lawful supplement ingredient.' },
+    { id: 'kava', n: 'Kava', lat: 'Piper methysticum', part: 'Root', f: 'extract', mono: 'sleep-and-calming-herbs', il: 'kava',
+      why: 'Failed in the largest anxiety trial (171 adults), which also showed liver and memory warning signs. Rare but serious liver injury has led to market withdrawals.' },
+    { id: 'atractylis', n: 'Gum thistle (Atractylis)', lat: 'Atractylis gummifera', part: 'Root', loc: 'addad (الداد)', f: 'extract', mono: 'moroccan-traditional-herbs', il: 'thistle',
+      why: 'Morocco’s poison centre recorded 467 poisonings with a 39.2% death rate; 81% of the deaths were children who ate the root by accident. Never use it in any remedy, and keep it away from children.' },
+    { id: 'harmal', n: 'Harmal (Syrian rue)', lat: 'Peganum harmala', part: 'Seed', loc: 'l-harmal (الحرمل)', f: 'extract', mono: 'moroccan-traditional-herbs', il: 'harmal',
+      why: 'Of 200 harmal poisonings reported to Morocco’s poison centre, a third had neurological signs, and 6.2% died where the outcome was known. It is often taken as a remedy or to cause an abortion.' },
+    { id: 'pennyroyal', n: 'Pennyroyal', lat: 'Mentha pulegium', part: 'Leaf, oil', loc: 'fliyou (فليو)', f: 'extract', mono: 'moroccan-traditional-herbs', il: 'pennyroyal',
+      why: 'A mint relative whose oil (pulegone) poisons the liver: 10 ml or more has caused moderate to severe poisoning, and deaths. Do not take the oil or use the plant as a remedy.' },
+    { id: 'wormwood', n: 'Wormwood', lat: 'Artemisia absinthium', part: 'Leaf', loc: 'chiba (شيبة)', f: 'extract', mono: 'moroccan-traditional-herbs', il: 'wormwood',
+      why: 'Its thujone is a nerve toxin that can cause seizures; in a controlled trial, high-thujone drinks worsened attention more than the same alcohol without it. Wormwood oil has caused kidney failure.' },
+    { id: 'kanna', n: 'Kanna', lat: 'Sceletium tortuosum', part: 'Whole plant extract', f: 'extract', mono: 'sceletium-tortuosum', il: 'sceletium',
+      why: 'A psychoactive plant that acts on serotonin, like some antidepressants. Its few tiny trials, mostly linked to the maker, show no credible cognitive benefit, it may interact with antidepressants, and it is not authorised as a food in the EU.' },
+  ];
+
+  // four jobs a plant can do for the brain: two thinking timeframes and two "brakes" (calm and sleep)
+  const PL_NONCOG = new Set(['mood_stress', 'sleep_related_cognition', 'vascular_health', 'cerebral_blood_flow', 'neuroplasticity_biomarkers', 'other']);
+  const PJOBS = [
+    ['today', 'Focus today', 'Today', 'zap', r => r.timeframe === 'acute' && !PL_NONCOG.has(r.domain)],
+    ['weeks', 'Thinking, with regular use', 'Weeks', 'hourglass', r => r.timeframe !== 'acute' && !PL_NONCOG.has(r.domain)],
+    ['calm', 'Calm and stress', 'Calm', 'wave', r => r.domain === 'mood_stress'],
+    ['sleep', 'Sleep', 'Sleep', 'moon', r => r.domain === 'sleep_related_cognition'],
+  ];
+  const plRows = p => { const m = byId[p.mono]; return m ? (m.evidence_by_outcome || []).filter(r => !p.st || (r.key_study_ids || []).some(s => p.st.includes(s))) : []; };
+  function plCell(p, job) {
+    const rows = plRows(p).filter(job[4]);
+    const ans = quickAnswer({ evidence_by_outcome: rows }, rows.map(r => r.domain));
+    const order = (x, y) => GR[y.grade] - GR[x.grade] || GENERAL.has(y.population) - GENERAL.has(x.population);
+    const pick = ans.cls === 'no' ? rows.filter(r => ['no_benefit', 'harm'].includes(r.direction) && 'ABE'.includes(r.grade)).sort(order)[0] : rows.filter(isBenefit).sort(order)[0];
+    return { a: ans.a, r: pick && ['Yes', 'In some groups', 'Maybe', 'No', 'No, may harm'].includes(ans.a) ? pick : null, d: ans.d };
+  }
+  const plFlag = (c, job) => c.r && 'ABC'.includes(c.r.grade) && ['Yes', 'In some groups', 'Maybe'].includes(c.a);
+  const plInfo = p => { const cells = PJOBS.map(j => plCell(p, j)); const best = Math.max(0, ...cells.filter(c => c.r && ['Yes', 'In some groups', 'Maybe'].includes(c.a)).map(c => GR[c.r.grade])); return { cells, best }; };
+  const plStrip = (p, cells, big) => `<div class="pl-strip${big ? ' big' : ''}">${PJOBS.map((j, i) => { const c = cells[i]; const tip = `${j[1]}: ${c.a}${c.r ? ` · grade ${c.r.grade} (${GRADE_WORD[c.r.grade]}) · ${lab(POP_LABEL, c.r.population)} · ${TF_SHORT[c.r.timeframe]}` : ''}`; return `<span class="pl-c${c.r ? '' : ' none'}" data-tip="${esc(tip)}"${c.r ? ` data-ev="${esc(p.mono + ':' + c.r.grade + ':' + c.r.timeframe)}"` : ''}>${icon(j[3], 'pl-j')}<span class="pl-cl">${esc(j[2])}</span>${vIcon(c.a)}${c.r ? grade(c.r.grade) : ''}<span class="sr">: ${esc(c.a)}</span></span>`; }).join('')}</div>`;
+  const pls = { job: 'all' };
+  const PL_FILTERS = [['all', 'All plants', 'sprout'], ['today', 'Focus today', 'zap'], ['weeks', 'Over weeks', 'hourglass'], ['calm', 'Calm & stress', 'wave'], ['sleep', 'Sleep', 'moon'], ['kitchen', 'Kitchen & tea', 'utensils'], ['avoid', 'Avoid', 'alert']];
+  function plantList() {
+    const ok = PLANTS.filter(p => byId[p.mono]);
+    // a plant whose monograph fails a hard safety or legal gate moves to the avoid list automatically
+    const good = ok.filter(p => byId[p.mono]._derived.eligibility !== 'ineligible').map(p => Object.assign({ info: plInfo(p) }, p));
+    const bad = PLANTS_AVOID.filter(p => byId[p.mono]).concat(ok.filter(p => byId[p.mono]._derived.eligibility === 'ineligible').map(p => Object.assign({ why: (byId[p.mono].safety || {}).gate_reason || p.watch }, p)));
+    good.sort((a, b) => b.info.best - a.info.best || a.n.localeCompare(b.n));
+    return { good, bad };
+  }
+  function plJobs(p) {
+    const j = [];
+    PJOBS.forEach((x, i) => { if (plFlag(p.info.cells[i])) j.push(x[0]); });
+    if (p.f === 'kitchen' || p.ma) j.push('kitchen');
+    return j;
+  }
+  function plCard(p) {
+    const m = byId[p.mono];
+    return `<article class="pl-card" id="pl-${esc(p.id)}" data-jobs="${esc(plJobs(p).join(' '))}">
+      <div class="pl-il">${pIll(p.il, p.n)}${p.ma ? `<span class="pl-ma" title="Common in Moroccan kitchens and teas">${icon('pin')}Morocco</span>` : ''}</div>
+      <div class="pl-b"><h3>${esc(p.n)}</h3><div class="pl-lat"><i>${esc(p.lat)}</i><span>${esc(p.part)}</span></div>
+        ${p.loc ? `<div class="pl-loc" lang="ar-MA">${esc(p.loc)}</div>` : ''}
+        ${plStrip(p, p.info.cells)}
+        <p class="pl-line">${esc(p.line)}</p>
+        <dl class="pl-facts"><dt>${icon('flask')}Studied as</dt><dd>${esc(p.dose)}</dd><dt>${icon('alert')}Watch out</dt><dd>${esc(p.watch)}</dd></dl>
+        <div class="pl-foot"><span class="pl-form ${p.f}">${icon(p.f === 'kitchen' ? 'utensils' : 'pill')}${p.f === 'kitchen' ? 'Food or tea' : 'Extract only'}</span>${gate(eligGate(m))}<a class="pl-more" href="#ingredient.${esc(m.id)}">All the evidence${icon('arrow')}</a></div></div>
+    </article>`;
+  }
+  function plAvoidCard(p) {
+    return `<article class="pl-card pl-avoid" id="pl-${esc(p.id)}" data-jobs="avoid">
+      <div class="pl-il">${pIll(p.il, p.n)}</div>
+      <div class="pl-b"><h3>${esc(p.n)}</h3><div class="pl-lat"><i>${esc(p.lat)}</i><span>${esc(p.part)}</span></div>${p.loc ? `<div class="pl-loc" lang="ar-MA">${esc(p.loc)}</div>` : ''}
+        <p class="pl-why">${icon('alert')}<span>${esc(p.why)}</span></p>
+        <div class="pl-foot">${gate('fail')}<a class="pl-more" href="#ingredient.${esc(p.mono)}">Why, with sources${icon('arrow')}</a></div></div>
+    </article>`;
+  }
+  // figure: every recommended plant against the four jobs, best evidence first
+  function plantMatrix(good) {
+    return `<figure class="section fig pl-fig"><figcaption><h2>Which plant does which job</h2><p>The best finding for each plant and job, computed from the graded rows. A letter is the strength of the evidence; the icon is the plain answer. Hover or tap a cell for who was studied.</p></figcaption>
+      <div class="tbl-wrap"><table class="pl-mx"><thead><tr><th scope="col">Plant</th>${PJOBS.map(j => `<th scope="col">${icon(j[3])}<span class="pl-mx-l">${esc(j[1])}</span><span class="pl-mx-s" aria-hidden="true">${esc(j[2])}</span></th>`).join('')}</tr></thead>
+      <tbody>${good.map(p => `<tr><th scope="row"><a href="#plants.${esc(p.id)}" data-plgo="${esc(p.id)}">${esc(p.n)}</a>${p.f === 'kitchen' ? `<span class="pl-mx-f" title="Food or tea">${icon('utensils')}</span>` : ''}</th>${p.info.cells.map((c, i) => { const tip = `${p.n} · ${PJOBS[i][1]}: ${c.a}${c.r ? ` · grade ${c.r.grade} · ${lab(POP_LABEL, c.r.population)}` : ''}`; return `<td data-tip="${esc(tip)}"${c.r ? ` data-ev="${esc(p.mono + ':' + c.r.grade + ':' + c.r.timeframe)}"` : ''} class="${c.r ? '' : 'none'}">${vIcon(c.a)}${c.r ? grade(c.r.grade) : ''}<span class="sr">${esc(c.a)}</span></td>`; }).join('')}</tr>`).join('')}</tbody></table></div>
+      <div class="em-key">${[['Yes', 'Yes'], ['In some groups', 'In some groups'], ['Maybe', 'Maybe'], ['Unclear', 'Unclear'], ['No', 'No'], ['Not studied', 'Not studied']].map(([a, l]) => `<span class="em-k">${vIcon(a)}${l}</span>`).join('')}<span class="em-k">${grade('A')}…${grade('E')} strength of evidence</span></div></figure>`;
+  }
+  function viewPlants(param) {
+    const { good, bad } = plantList();
+    if (param && PL_FILTERS.some(f => f[0] === param)) pls.job = param;
+    const focus = param && !PL_FILTERS.some(f => f[0] === param) ? param : null;
+    if (focus) pls.job = 'all';
+    const cnt = k => k === 'all' ? good.length + bad.length : k === 'avoid' ? bad.length : good.filter(p => plJobs(p).includes(k)).length;
+    const ab = good.filter(p => p.info.best >= GR.B).length;
+    const kit = good.filter(p => p.f === 'kitchen').length;
+    const studies = new Set(good.concat(bad).map(p => p.mono)).size;
+    return `<div class="pl-page"${focus ? ` data-focus="${esc(focus)}"` : ''}>
+      <header class="pl-hero"><div class="eyebrow">Library · plants</div>
+        <div class="px-hero-top"><h1>Plants for the brain</h1>${shareBtn()}</div>
+        <p class="lead">${good.length + bad.length} plants, herbs and spices, graded from human trials: what each does for focus today, thinking over weeks, calm and sleep, how it was taken, and who should skip it. Plants that ease stress or improve sleep remove brakes; they do not make you think faster.</p>
+        <div class="pl-stats"><div><b>${good.length + bad.length}</b><span>plants graded, from ${studies} research files</span></div><div><b>${ab}</b><span>with moderate or strong evidence for at least one job</span></div><div><b>${kit}</b><span>eaten or drunk as ordinary food or tea</span></div><div class="warn"><b>${bad.length}</b><span>to avoid or keep away from</span></div></div></header>
+      <div class="pl-filters" role="group" aria-label="Show plants for">${PL_FILTERS.map(([k, l, ic]) => `<button type="button" data-plf="${k}" aria-pressed="${pls.job === k}"${k === 'avoid' ? ' class="avoid"' : ''}>${icon(ic)}<span>${esc(l)}</span><small>${cnt(k)}</small></button>`).join('')}</div>
+      ${plantMatrix(good)}
+      <section class="section"><h2>The plants</h2><p class="muted pl-sub">Best evidence first. Each card's strip shows the four jobs; the grades come straight from the research files.</p>
+        <div class="pl-grid" id="pl-grid">${good.map(plCard).join('')}</div>
+        <p class="pl-empty muted" hidden>No plant has graded evidence for this yet.</p></section>
+      <section class="section pl-avoid-sec" id="pl-avoid"><h2>${icon('alert')}Keep away</h2><p class="muted pl-sub">Sold as natural brain boosters, or used in traditional remedies, but unsafe, drug-like or not allowed.</p>
+        <div class="pl-grid">${bad.map(plAvoidCard).join('')}</div></section>
+      <section class="section pl-rules"><h2>Five rules for brain plants</h2><ol class="pl-rule-list">
+        <li><b>A herb in your tea is not the extract in the trial.</b> Most results come from concentrated, standardised extracts at doses a kitchen cannot reach. Each card says how the plant was taken.</li>
+        <li><b>One brand is not the whole plant.</b> Several findings come from a single branded extract, often funded by its maker. They may not apply to other products of the same plant.</li>
+        <li><b>Calm and sleep are brakes, not boosters.</b> Lowering stress or sleeping better removes what holds thinking back; it is not the same as a measured gain in memory or attention.</li>
+        <li><b>Natural is not safe.</b> Plants interact with medicines (blood thinners, antidepressants, sedatives, diabetes drugs), and several are unsafe in pregnancy. Ask a doctor or pharmacist first if that applies to you.</li>
+        <li><b>Know what you are buying.</b> Loose herbs and powders can be mislabelled, mixed with other species or contaminated. Buy identified, tested products.</li></ol></section>
+      <div class="callout px-fine"><strong>How this page works.</strong> Every grade on this page is read from the ingredient research files, the same rows as on each ingredient page, and tested automatically against them. Darija names are common Moroccan names, given to help you find the plant, not research findings. Mushrooms such as <a href="#ingredient.lions-mane-mushroom">lion's mane</a> are fungi, not plants, so they have their own pages. Not medical advice.</div>
+    </div>`;
+  }
+  function plFilter(app, k) {
+    pls.job = k;
+    app.querySelectorAll('[data-plf]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.plf === k)));
+    let shown = 0;
+    app.querySelectorAll('#pl-grid .pl-card').forEach(c => { const on = k === 'all' || (c.dataset.jobs || '').split(' ').includes(k); c.hidden = !on; if (on) shown++; });
+    const av = document.getElementById('pl-avoid'); if (av) av.hidden = !(k === 'all' || k === 'avoid');
+    const gs = app.querySelector('#pl-grid'), sec = gs && gs.closest ? gs.closest('section') : null; if (sec) sec.hidden = k === 'avoid';
+    const em = app.querySelector('.pl-empty'); if (em) em.hidden = shown > 0 || k === 'avoid';
+    CURRENT = 'plants' + (k === 'all' ? '' : '.' + k);
+    try { history.replaceState(null, '', '#' + CURRENT); } catch (e) { /* sandboxed frame */ }
+  }
+  const PLANT_MONOS = new Set(PLANTS.concat(PLANTS_AVOID).map(p => p.mono));
+  function plGo(id) {
+    const app = document.getElementById('app'), el = document.getElementById('pl-' + id);
+    if (!el) return;
+    if (el.hidden || (el.closest && el.closest('[hidden]'))) plFilter(app, 'all');
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.classList.add('pl-flash'); setTimeout(() => el.classList.remove('pl-flash'), 1800);
+  }
+
   function viewNZT48() {
     const NI = {
       clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>',
@@ -1510,12 +1817,13 @@
     if (!rows.length) return { cls: 'none', a: 'Not studied', d: onlyTf ? 'No long-term human study in this atlas measured it. Unknown is not the same as “does not work”.' : 'No human study in this atlas measured it. Unknown is not the same as “does not work”.' };
     const order = (x, y) => GR[y.grade] - GR[x.grade] || GENERAL.has(y.population) - GENERAL.has(x.population);
     const ben = rows.filter(r => isBenefit(r) && 'ABC'.includes(r.grade)).sort(order);
-    const nul = rows.filter(r => ['no_benefit', 'harm'].includes(r.direction) && 'AB'.includes(r.grade || 'x')).sort(order);
+    // grade E means the evidence points to no benefit (or to a concern): it answers "No" just as an A or B null result does
+    const nul = rows.filter(r => ['no_benefit', 'harm'].includes(r.direction) && 'ABE'.includes(r.grade || 'x')).sort(order);
     const where = r => `${grade(r.grade)} ${tf(r.timeframe)} <strong>${esc(lab(DOMAIN_LABEL, r.domain))}</strong> in ${esc(popWord(r.population))}`;
     const not = r => `${grade(r.grade)} ${r.direction === 'harm' ? 'a negative effect on' : 'no effect on'} ${esc(lab(DOMAIN_LABEL, r.domain).toLowerCase())} in ${esc(popWord(r.population))}`;
     const b = ben[0], n = nul[0];
     if (b && 'AB'.includes(b.grade)) return { cls: 'yes', a: GENERAL.has(b.population) ? 'Yes' : 'In some groups', d: where(b) + (n ? ` <span class="muted">· but good evidence of ${not(n)}</span>` : '') };
-    if (n) return { cls: 'no', a: n.direction === 'harm' ? 'No, may harm' : 'No', d: 'Good trials found ' + not(n) + (b ? ` <span class="muted">· weaker positive signal: ${where(b)}</span>` : '') };
+    if (n) return { cls: 'no', a: n.direction === 'harm' ? 'No, may harm' : 'No', d: (n.grade === 'E' ? 'The evidence points to ' : 'Good trials found ') + not(n) + (b ? ` <span class="muted">· weaker positive signal: ${where(b)}</span>` : '') };
     if (b) return { cls: 'weak', a: 'Maybe', d: 'Limited evidence only: ' + where(b) };
     return { cls: 'weak', a: 'Unclear', d: 'Studied, but the results are weak, mixed or preliminary.' };
   }
@@ -1554,6 +1862,8 @@
   const ist = { id: null, tab: 'overview' };
   function viewIngredient(id) {
     const m = byId[id];
+    if (!m && RETIRED[id]) return `<div class="page-head"><div><div class="eyebrow">Split into separate pages</div><h1>${esc(RETIRED[id].n)}</h1><p class="lead">This combined entry was replaced by one research page per plant, each with its own grades and sources. Rankings written earlier still cite the combined entry.</p></div></div>
+      <div class="lib-grid">${RETIRED[id].to.filter(x => byId[x]).map(x => `<a class="lib-card" href="#ingredient.${esc(x)}"><span class="lib-ic">${icon('sprout')}</span><span class="lib-tx"><strong>${esc(byId[x].name)}</strong><span>${esc(byId[x].one_line_verdict || '')}</span></span>${icon('chev', 'go')}</a>`).join('')}<a class="lib-card" href="#plants"><span class="lib-ic">${icon('grid')}</span><span class="lib-tx"><strong>Plants for the brain</strong><span>Every plant, side by side.</span></span>${icon('chev', 'go')}</a></div>`;
     if (!m) return `<div class="page-head"><div><h1>Ingredient not found</h1><p class="lead">There is no ingredient with the id <code>${esc(id)}</code>. <a href="#database">Browse all ingredients</a> or press <kbd>/</kbd> to search.</p></div></div>`;
     if (ist.id !== id) { ist.id = id; ist.tab = 'overview'; }
     noteRecent(id);
@@ -1593,7 +1903,7 @@
     return `<div class="ing-page">
     <nav class="crumbs" aria-label="Breadcrumb"><a href="#database">Ingredients</a>${icon('chev')}<span>${esc(m.category)} · ${esc(m.category_name)}</span></nav>
     <div class="ing-hero"><div><div class="ing-title">${catAv(m, 'lg')}<h1>${esc(m.name)}</h1></div><p class="verdict">${esc(m.one_line_verdict)}</p></div>
-      <div class="ing-actions">${cmpTog(m, true)}${shareBtn()}</div></div>
+      <div class="ing-actions">${cmpTog(m, true)}${shareBtn()}${(() => { const pl = PLANTS.concat(PLANTS_AVOID).find(x => x.mono === m.id); return pl ? `<a class="btn ghost" href="#plants.${esc(pl.id)}">${icon('sprout')}All brain plants</a>` : ''; })()}</div></div>
     <section class="qa" aria-labelledby="qa-t"><div class="qa-h"><h2 id="qa-t">Does it actually help?</h2><p>Human studies only. Biomarkers and mood never count.</p></div>
       ${QA_GOALS.map(([q, sub, doms, onlyTf]) => { const x = quickAnswer(m, doms, onlyTf); return `<div class="qa-row"><div class="qa-q">${esc(q)}<small class="muted">${esc(sub)}</small></div><div class="qa-a ${(VERDICT[x.a] || VERDICT.Unclear)[1]}">${vIcon(x.a)}${esc(x.a)}</div><div class="qa-d">${x.d}</div></div>`; }).join('')}
     </section>
@@ -1897,7 +2207,7 @@
     return PENDING[k];
   }
   // what a view cannot render without; and which views re-render to add late detail
-  const NEEDS = v => v === 'search' ? ['details', 'syn', 'bib'] : v === 'bibliography' ? ['bib'] : LIB_OF[v] && v !== 'compare' && v !== 'matrix' ? ['syn'] : [];
+  const NEEDS = v => v === 'search' ? ['details', 'syn', 'bib'] : v === 'bibliography' ? ['bib'] : LIB_OF[v] && v !== 'compare' && v !== 'matrix' && v !== 'plants' ? ['syn'] : [];
   const REFRESH = { details: ['ingredient'], syn: ['home'] };
   const loadingHtml = what => `<div class="loading-view" role="status"><span class="spinner" aria-hidden="true"></span><p>Loading ${esc(what)}…</p></div>`;
 
@@ -2004,7 +2314,7 @@
         <div class="legend-block"><h3><span class="n">1</span>How strong is the evidence?</h3><div class="legend-rows">${['A', 'B', 'C', 'D', 'E'].map(g => row(grade(g), `<b>${GRADE_WORD[g]}</b>: ${GRADE_HELP[g]}`)).join('')}${row(grade(null), '<b>No grade</b>: not studied for this. Unknown, which is not the same as “no effect”.')}</div></div>
         <div class="legend-block"><h3><span class="n">2</span>When does it work?</h3><div class="legend-rows">${row(tf('acute'), 'A single dose, tested the same day.')}${row(tf('short_term_days'), '2 to 13 days of use.')}${row(tf('chronic'), '2 weeks or longer of regular use.')}</div></div>
         <div class="legend-block"><h3><span class="n">3</span>Is it safe and allowed?</h3><div class="legend-rows">${row(gate('pass'), 'No safety or legal barrier found.')}${row(gate('conditional'), 'Usable only within the limits on its page: dose, who should avoid it, allowed wording.')}${row(gate('fail'), 'Excluded: fails a hard safety or legal requirement.')}</div></div>
-        <div class="legend-block"><h3><span class="n">4</span>The plain answers</h3><div class="legend-rows">${[['Yes', 'Good evidence of a benefit in healthy adults.'], ['In some groups', 'Good evidence, but only in a narrower group (for example older adults or the sleep-deprived).'], ['Maybe', 'Only limited evidence of a benefit.'], ['Unclear', 'Studied, but the results are weak or mixed.'], ['No', 'Good trials found no benefit.'], ['No, may harm', 'Good trials found a negative effect.'], ['Not studied', 'No human study measured it.']].map(([a, t]) => row(`<span class="qa-a">${vIcon(a)}</span>`, `<b>${a}</b>: ${t}`)).join('')}</div></div>
+        <div class="legend-block"><h3><span class="n">4</span>The plain answers</h3><div class="legend-rows">${[['Yes', 'Good evidence of a benefit in healthy adults.'], ['In some groups', 'Good evidence, but only in a narrower group (for example older adults or the sleep-deprived).'], ['Maybe', 'Only limited evidence of a benefit.'], ['Unclear', 'Studied, but the results are weak or mixed.'], ['No', 'Good trials, or the weight of the evidence (grade E), found no benefit.'], ['No, may harm', 'Good trials found a negative effect, or the evidence points to a safety concern.'], ['Not studied', 'No human study measured it.']].map(([a, t]) => row(`<span class="qa-a">${vIcon(a)}</span>`, `<b>${a}</b>: ${t}`)).join('')}</div></div>
         <div class="legend-note"><strong>One rule to remember:</strong> a grade belongs to one outcome, in one group of people, over one timeframe. Caffeine is grade A for same-day alertness and has no long-term grade at all. Feeling alert is not remembering more, and a better blood marker is not a better brain.</div>
         <div class="legend-block"><h3>Shortcuts</h3><div class="legend-rows">${row('<kbd>/</kbd> or <kbd>Ctrl K</kbd>', 'Search anything')}${row('<kbd>?</kbd>', 'Open this guide')}${row('<kbd>Esc</kbd>', 'Close a panel')}</div></div>
       </div>
@@ -2076,6 +2386,7 @@
       else if (view === 'profile') html = viewProfile(param);
       else if (view === 'protocol') html = viewProtocol(param);
       else if (view === 'cooking') html = viewCooking(param);
+      else if (view === 'plants') html = viewPlants(param);
       else if (VIEWS[view]) html = VIEWS[view]();
       else html = `<div class="page-head"><div><h1>Page not found</h1><p class="lead">This address does not match a page. <a href="#home">Go to the start page</a> or press <kbd>/</kbd> to search.</p></div></div>`;
     } catch (e) { html = `<h1>Rendering error</h1><pre>${esc(e.stack || e)}</pre>`; console.error(e); }
@@ -2110,6 +2421,9 @@
       if (cb.checked) list.push(+i);
       SHOP[rid] = list; store.set('bf-shop', SHOP);
     }));
+    // plants: filter chips; #plants.<plant> lands on that plant's card
+    app.querySelectorAll('[data-plf]').forEach(b => b.addEventListener('click', () => plFilter(app, b.dataset.plf)));
+    if (view === 'plants') { const pg = app.querySelector('.pl-page'), fid = pg && pg.dataset ? pg.dataset.focus : null; if (fid) setTimeout(() => plGo(fid), 60); else plFilter(app, pls.job); }
     // evidence map: a cell opens its finding in the Evidence tab
     app.querySelectorAll('[data-emrow]').forEach(b => b.addEventListener('click', () => {
       setITab(app, 'evidence');
@@ -2262,6 +2576,8 @@
     if (t.closest('[data-trayclear]')) { TRAY.length = 0; store.set('bf-compare', TRAY); syncTray(); return; }
     if (t.closest('[data-share]')) { e.preventDefault(); sharePage(); return; }
     if (t.closest('[data-print]')) { e.preventDefault(); window.print(); return; }
+    const plg = t.closest('[data-plgo]');
+    if (plg) { e.preventDefault(); plGo(plg.dataset.plgo); return; }
     const th = t.closest('[data-theme-set]');
     if (th) { const v = th.dataset.themeSet; try { localStorage.setItem('bf-theme', v); } catch (err) { /* storage blocked */ } applyTheme(v); renderNav(); return; }
     if (t.closest('.skip-link')) { e.preventDefault(); const m = document.getElementById('app'); if (m && m.focus) m.focus(); return; }
